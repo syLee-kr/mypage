@@ -1,0 +1,20 @@
+<!-- 게시글 작성 모달 (분리된 템플릿) -->
+<div id="create-post-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeModal()">&times;</span>
+        <h2>게시글 작성</h2>
+        <form id="create-post-form">
+      <textarea
+              id="create-post-content"
+              placeholder="내용을 입력하세요"
+              required
+      ></textarea>
+            <label>
+                공개 여부:
+                <input type="checkbox" id="create-is-public" checked />
+            </label>
+            <input type="file" id="create-post-image" accept="image/*" />
+            <button type="submit">작성</button>
+        </form>
+    </div>
+</div>

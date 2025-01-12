@@ -1,0 +1,301 @@
+#calendar-container {
+    width: 100%;
+    height: 93vh;
+    background-color: #98b4b8; /* 어두운 배경 */
+    border-radius: 20px; /* 더 둥글게 */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8); /* 더 깊은 그림자 */
+    padding: 10px;
+}
+
+/* FullCalendar 스타일 */
+#calendar {
+    width: 100%;
+    height: 90vh;
+    margin: auto;
+    font-family: 'Pretendard-Regular', sans-serif;
+    background-color: #98b4b8; /* 캘린더 배경색 */
+    border-radius: 15px; /* 더 둥글게 */
+}
+.fc-event.market {
+    background-color: #ff4d4d !important; /* 붉은 계열 */
+    color: #ffffff !important; /* 흰색 글자 */
+    border: none !important; /* 테두리 제거 */
+}
+
+/* 게시글 업로드 - 푸른 계열 */
+.fc-event.post {
+    background-color: #4da6ff !important; /* 푸른 계열 */
+    color: #ffffff !important; /* 흰색 글자 */
+    border: none !important; /* 테두리 제거 */
+}
+
+/* 서버 관리 - 노란 계열 */
+.fc-event.server {
+    background-color: #ffd966 !important; /* 노란 계열 */
+    color: #000000 !important; /* 검은색 글자 */
+    border: none !important; /* 테두리 제거 */
+}
+
+/* 이벤트 - 초록 계열 */
+.fc-event.event {
+    background-color: #66cc66 !important; /* 초록 계열 */
+    color: #ffffff !important; /* 흰색 글자 */
+    border: none !important; /* 테두리 제거 */
+}
+
+/* 모든 이벤트 공통 스타일 */
+.fc-event {
+    border-radius: 5px; /* 둥근 모서리 */
+    padding: 5px; /* 일정 내부 여백 */
+    font-size: 14px; /* 글자 크기 */
+    text-align: center; /* 텍스트 중앙 정렬 */
+    box-sizing: border-box; /* 패딩 포함 크기 계산 */
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* 호버 효과 */
+}
+
+/* 호버 시 효과 추가 */
+.fc-event:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
+}
+.fc .fc-view-harness,
+.fc .fc-scrollgrid {
+    border-radius: 10px;
+    overflow: visible; /* 내용이 넘지 않도록 설정 */
+}
+
+.fc-col-header-cell {
+    font-family: 'Pretendard-Regular', sans-serif;
+    background-color: #4c9393;
+    color: white; /* 흰색 글자 */
+    font-size: 17px;
+    text-align: center;
+    height: 60px; /* 높이 설정 */
+    line-height: 60px; /* 높이와 동일하게 설정하여 수직 중앙 정렬 */
+    border-bottom: none; /* 요일 칸 아래 선 제거 */
+
+    display: inline-block; /* 가로로 나열되도록 설정 */
+    width: calc(100% / 7); /* 요일 헤더가 화면 너비를 7등분 */
+    box-sizing: border-box; /* 패딩과 테두리를 포함한 크기 계산 */
+    padding: 0; /* 불필요한 패딩 제거 */
+}
+
+.fc-col-header {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* 요일 헤더 내부의 텍스트 컨테이너 경계 제거 */
+.fc-col-header-cell .fc-col-header-cell-cushion {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* 요일 헤더 셀 사이의 간격 없애기 */
+.fc-col-header-cell {
+    border-right: none !important;
+    border-left: none !important;
+}
+
+/* 요일 칸을 나누는 선 제거 */
+.fc-daygrid-day-frame {
+    border: none;
+}
+
+.fc-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.fc-toolbar .fc-prev-button,
+.fc-toolbar .fc-next-button {
+    background-color: #4c9393; /* 푸른색 배경 */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    padding: 5px;
+    font-size: 14px;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.fc-toolbar .fc-today-button {
+    background-color: #4c9393;
+    color: white; /* 텍스트 색상을 흰색으로 명확히 지정 */
+    border: none;
+    border-radius: 5px;
+    padding: 5px 15px;
+    width: 100px;
+    height: 50px;
+    font-size: 17px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.fc-today-button:disabled {
+    background-color: #4c9393;
+    color: white;
+}
+
+.fc-today-button:hover {
+    background-color: #659595;
+}
+
+.fc-event {
+    color: white; /* 기본 텍스트 색상 */
+    border: none; /* 기본 테두리 제거 */
+}
+
+/* 다중 날 이벤트의 연속성 유지 */
+.fc-daygrid-event {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.fc-day-disabled {
+    background-color: #f8f9fa;
+    pointer-events: none;
+}
+
+.fc-daygrid-day {
+    border: none; /* 날짜 칸 테두리 제거 */
+    border-radius: 10px; /* 둥근 모서리 */
+    overflow: visible; /* 둥근 모서리를 넘는 요소 숨기기 */
+}
+
+/* 모달 스타일 */
+.modal {
+    display: none; /* 기본적으로 숨김 */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(186, 195, 214, 0.8); /* 어두운 배경 */
+    justify-content: center; /* 가로 중앙 정렬 */
+    align-items: center; /* 세로 중앙 정렬 */
+    overflow: hidden; /* 오버플로우 숨김 */
+}
+
+.modal.active {
+    display: flex; /* 활성화 시 플렉스 박스로 표시 */
+}
+
+.modal-content {
+    background-color: #1a1a1a;
+    padding: 20px;
+    border-radius: 20px; /* 더 둥글게 */
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8); /* 깊은 그림자 */
+    box-sizing: border-box; /* 패딩 포함 */
+    position: relative; /* 닫기 버튼 위치를 위해 추가 */
+    max-height: 90vh; /* 화면 높이의 90%를 초과하지 않도록 설정 */
+    overflow-y: auto; /* 내용이 많을 경우 스크롤 가능 */
+}
+
+/* 닫기 버튼 스타일 */
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    color: #ffffff;
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-button:hover {
+    color: #ff00ff; /* 네온 핑크 */
+}
+
+/* 폼 스타일 */
+#event-form {
+    display: flex;
+    flex-direction: column;
+    padding: 0 10px; /* 좌우 패딩 추가 */
+    box-sizing: border-box;
+}
+
+#event-form label {
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #00e6e6; /* 네온 블루 */
+}
+
+#event-form input,
+#event-form textarea,
+#event-form select {
+    width: 100%; /* 너비 100%으로 설정 */
+    padding: 12px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 15px; /* 더 둥글게 */
+    background-color: #2a2a2a;
+    color: #ffffff;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box; /* 패딩 포함 */
+}
+
+#event-form input:focus,
+#event-form textarea:focus,
+#event-form select:focus {
+    border: 2px solid #00e6e6;
+    box-shadow: 0 0 10px #00e6e6;
+}
+
+#save-event-button {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 16px;
+    background: #00e6e6; /* 그라데이션 */
+    color: #ffffff;
+    border: none;
+    border-radius: 15px; /* 더 둥글게 */
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6); /* 버튼 그림자 */
+}
+
+#save-event-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8);
+}
+
+#save-event-button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 30px auto;
+    }
+}
+
+@media (max-width: 480px) {
+    #event-form input,
+    #event-form textarea,
+    #event-form select {
+        font-size: 14px; /* 입력 필드 폰트 크기 축소 */
+        padding: 10px;
+    }
+
+    #save-event-button {
+        font-size: 14px;
+        padding: 10px;
+    }
+}

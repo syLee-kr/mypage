@@ -1,0 +1,186 @@
+<!-- app/templates/post_list.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>게시판</title>
+  <!-- CSS -->
+  <link rel="stylesheet" href="/static/css/sidebar.css" />
+  <link rel="stylesheet" href="/static/css/post.css" />
+  <link rel="stylesheet" href="/static/css/modal.css" />
+  <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-..."
+          crossorigin="anonymous"
+  />
+</head>
+<body>
+<div class="layout-container">
+  {% include "sub/sidebar.html" %}
+
+  <div id="main-container" class="main-container">
+    <!-- 게시글 목록 컨테이너 -->
+    <div id="post-container" class="post-container">
+      {% for post in initial_posts %}
+      <div class="post" id="post-{{ post.id }}">
+        <!-- 게시글 헤더 -->
+        <div class="post-header">
+          <img src="/static/images/profile.png" alt="프로필 이미지" class="profile-pic" />
+          <div class="author-name">{{ post.author_id }}</div>
+        </div>
+
+        {% if post.image_urls %}
+        <div class="post-image-slider" id="post-image-slider-{{ post.id }}">
+          <!-- 왼쪽 버튼 -->
+          <button class="slider-btn left" onclick="prevImage('{{ post.id }}')">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <!-- 실제 이미지 표시 영역 -->
+          <div class="slider-image-wrapper" id="slider-image-wrapper-{{ post.id }}">
+            <!-- JS에서 현재 인덱스의 이미지 URL만 보이도록 관리 -->
+            <!-- 일단 첫번째 이미지를 기본으로 표시, JS로 나머지 제어 가능 -->
+            <img src="{{ post.image_urls[0] }}" alt="게시글 이미지" class="slider-image"
+                 id="current-image-{{ post.id }}">
+          </div>
+
+          <!-- 오른쪽 버튼 -->
+          <button class="slider-btn right" onclick="nextImage('{{ post.id }}')">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+        {% endif %}
+
+        <!-- 게시글 내용 -->
+        <div class="post-content">{{ post.content }}</div>
+
+        <!-- 게시글 액션 (좋아요) -->
+        <div class="post-actions">
+          <div class="actions">
+            <button
+                    id="like-button-{{ post.id }}"
+                    class="like-button {% if user_id in post.likes %}liked{% endif %}"
+                    onclick="toggleLike('{{ post.id }}')"
+            >
+              {% if user_id in post.likes %}
+              <!-- 좋아요 상태라면 꽉 찬 하트(fas) 아이콘 표시 -->
+              <i class="fas fa-heart"></i>
+              {% else %}
+              <!-- 좋아요 안 누른 상태는 비어 있는 하트(far) 아이콘 표시 -->
+              <i class="far fa-heart"></i>
+              {% endif %}
+            </button>
+          </div>
+          <div class="likes-count">
+            좋아요 {{ post.likes | length }}개
+          </div>
+        </div>
+
+        <!-- 댓글 섹션 (목록 페이지에서는 최대 2개만 표시) -->
+        <div class="post-comments">
+          <div class="comment-header">
+            댓글 <span class="comment-count">{{ post.comments | length }}</span>
+          </div>
+
+          <div id="comments-{{ post.id }}" class="comments">
+            {% if post.comments|length == 0 %}
+            <p class="no-comments">댓글이 없습니다.</p>
+            {% else %}
+            <!-- 처음 2개의 댓글만 표시 -->
+            {% for comment in post.comments[:2] %}
+            <div class="comment">
+              <span class="comment-author">{{ comment.user_id }}</span>
+              <span class="comment-text">{{ comment.content }}</span>
+            </div>
+            {% endfor %}
+
+            <!-- 2개보다 더 많다면, 상세 페이지로 이동하는 링크 표시 -->
+            {% if post.comments|length > 2 %}
+            <a href="/post/{{ post.id }}" class="view-all-comments">
+              전체 댓글 보기 ({{ post.comments|length }}개)
+            </a>
+            {% endif %}
+            {% endif %}
+          </div>
+
+          <!-- 댓글 입력 폼 (원한다면 유지/제거 가능) -->
+          <div class="comment-input-container">
+            <input
+                    type="text"
+                    placeholder="댓글을 입력하세요..."
+                    class="comment-input"
+                    id="comment-input-{{ post.id }}"
+            />
+            <button class="comment-submit" onclick="addComment('{{ post.id }}')">게시</button>
+          </div>
+        </div>
+
+        <!-- 게시글 수정 및 삭제 -->
+        {% if post.author_id == user_id %}
+        <div class="post-actions">
+          <button onclick="openEditModal('{{ post.id }}')">수정</button>
+          <button onclick="deletePost('{{ post.id }}')">삭제</button>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- 더 보기 버튼 (무한 스크롤 or 수동 페이징용) -->
+    <button id="load-more" class="load-more-button">더 보기</button>
+  </div>
+</div>
+
+
+<div id="create-post-modal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close-button" onclick="closeModal()">&times;</span>
+
+    <!-- 이미지 드래그 앤 드롭 영역 -->
+    <div class="image-drag-area" id="image-drag-area">
+      <!-- 좌우 버튼 -->
+      <button class="image-nav left" id="image-nav-left" style="display: none;">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+
+      <div class="image-preview" id="image-preview">
+        <!-- 여기에 <img>가 미리보기로 삽입됨 -->
+      </div>
+
+      <button class="image-nav right" id="image-nav-right" style="display: none;">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+
+      <!-- 숨겨진 파일 input (multiple) -->
+      <input
+              type="file"
+              id="hidden-file-input"
+              accept="image/*"
+              multiple
+              style="display: none;"
+      />
+    </div>
+
+    <!-- 공개 여부 체크박스 -->
+    <label class="public-check-label">
+      <input type="checkbox" id="create-is-public" checked />
+      공개 여부
+    </label>
+
+    <!-- 본문 텍스트 -->
+    <textarea
+            id="create-post-content"
+            placeholder="간단한 본문을 작성하세요"
+            required
+    ></textarea>
+
+    <!-- 작성(전송) 버튼 -->
+    <button id="create-post-submit" type="button">게시글 작성</button>
+  </div>
+</div>
+
+<script src="/static/js/post.js"></script>
+</body>
+</html>

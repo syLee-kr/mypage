@@ -1,0 +1,268 @@
+@font-face {
+    font-family: 'SBAggroB';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/SBAggroB.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pretendard-Regular';
+    src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+body {
+    height: 100vh;
+    margin: 0;
+    font-family: 'Pretendard-Regular', sans-serif;
+    background-color: #0d0d0d; /* 더 어두운 배경 */
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+a {
+    text-decoration: none;
+    color: #00e6e6; /* 네온 블루 */
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #ff00ff; /* 네온 핑크 */
+}
+
+div.main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 380px; /* 약간 더 넓게 조정 */
+    padding: 20px;
+}
+
+div.subMain {
+    width: 100%;
+    border-radius: 15px;
+    background-color: #1a1a1a; /* 진한 그레이 배경 */
+    padding: 30px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.8); /* 더 깊은 그림자 */
+}
+
+h1 {
+    font-family: 'SBAggroB', serif;
+    font-size: 38px;
+    text-align: center;
+    color: #00e6e6; /* 타이틀 네온 블루 */
+    margin-bottom: 25px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+input[type='text'], input[type='password'] {
+    width: calc(100% - 28px);
+    padding: 12px;
+    margin: 0 auto;
+    border-radius: 8px;
+    border: 1px solid #333333;
+    background-color: #262626; /* 어두운 입력 필드 */
+    color: #ffffff;
+    font-size: 15px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type='text']:focus, input[type='password']:focus {
+    border-color: #00e6e6; /* 포커스 네온 블루 */
+    box-shadow: 0 0 8px #00e6e6; /* 네온 효과 */
+    outline: none;
+}
+
+div.form-cbox {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #b3b3b3; /* 부드러운 그레이 */
+}
+
+label.cbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: #ffffff;
+}
+
+input[type='checkbox'] {
+    width: 16px;
+    height: 16px;
+    accent-color: #00e6e6; /* 네온 블루 체크박스 */
+    margin: 0;
+}
+
+div.find a {
+    color: #00e6e6;
+    font-size: 13px;
+}
+
+div.find a:hover {
+    color: #ff00ff; /* 네온 핑크 호버 */
+}
+
+div.login {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 30px;
+    border: none;
+    background-color: #00e6e6; /* 네온 블루 버튼 */
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.3s, box-shadow 0.3s ease;
+}
+
+button:hover {
+    background-color: #ff00ff; /* 네온 핑크 */
+    transform: scale(1.05);
+    box-shadow: 0 0 12px #ff00ff; /* 네온 효과 */
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+.horizon {
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: #666666;
+}
+
+.horizon::before, .horizon::after {
+    content: "";
+    flex-grow: 1;
+    height: 1px;
+    background-color: #333333;
+    margin: 0 10px;
+}
+
+.login-another {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+    gap: 20px;
+}
+
+img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* 둥근 형태로 강제 적용 */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0); /* 초기 상태에서 네온 효과 제거 */
+}
+/* 둥근 모양 아이콘 */
+img.round-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* 둥근 형태 */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0);
+}
+
+img.round-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 12px #00e6e6; /* 네온 블루 효과 */
+}
+
+img.round-icon:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 12px #ff00ff; /* 클릭 시 네온 핑크 효과 */
+}
+
+/* 네모난 모양 아이콘 */
+img.square-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px; /* 약간 둥근 모서리 */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0);
+}
+
+img.square-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 12px #00e6e6; /* 네온 블루 효과 */
+}
+
+img.square-icon:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 12px #ff00ff; /* 클릭 시 네온 핑크 효과 */
+}
+
+img:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 12px #00e6e6; /* 둥근 이미지 주위를 따라가는 네온 효과 */
+}
+
+img:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 12px #ff00ff; /* 클릭 시 네온 효과 */
+}
+img:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 8px #00e6e6; /* 네온 블루 효과 */
+}
+
+div.join {
+    margin-top: 20px;
+    font-size: 14px;
+    text-align: center;
+    color: #b3b3b3;
+}
+
+div.join a {
+    color: #00e6e6;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+div.join a:hover {
+    color: #ff00ff;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-radius: 10px;
+    color: #ffffff;
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+}

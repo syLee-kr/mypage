@@ -1,0 +1,256 @@
+/* Reset 및 기본 스타일 */
+@font-face {
+    font-family: 'SBAggroB';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/SBAggroB.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pretendard-Regular';
+    src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    height: 100vh;
+    margin: 0;
+    font-family: 'Pretendard-Regular', sans-serif;
+    background-color: #0d0d0d; /* 어두운 배경 */
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* 컨테이너 스타일 */
+.container {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    width: 100%;
+    max-width: 800px; /* 두 개의 컨테이너가 옆에 배치되도록 조정 */
+}
+
+.form-container, .terms-container {
+    flex: 1;
+    background-color: #1a1a1a;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+.terms-content {
+    height: 300px !important;
+    overflow-y: auto;
+    border: 1px solid #333333;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #262626;
+    font-size: 14px;
+    color: #b3b3b3;
+}
+
+.agreement {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #ffffff;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #00e6e6;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: #ff00ff;
+    transform: translateY(-2px);
+    box-shadow: 0 0 10px #ff00ff;
+}
+
+/* 폼 스타일 */
+form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+h1, h2 {
+    font-family: 'SBAggroB', serif;
+    text-align: center;
+    color: #00e6e6; /* 네온 블루 */
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 32px;
+}
+
+h2 {
+    font-size: 24px;
+}
+
+/* 링크 스타일 */
+a {
+    text-decoration: none; /* 밑줄 제거 */
+    color: #00e6e6; /* 기본 링크 색상 */
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #ff00ff; /* 호버 시 네온 핑크 */
+}
+
+/* 입력 필드 및 드롭다운 스타일 */
+input[type='text'],
+input[type='password'],
+select {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #333333;
+    height: 40px;
+    padding: 10px 0;
+    outline: none;
+    font-size: 15px;
+    background: #1a1a1a; /* 어두운 배경 */
+    color: #ffffff; /* 흰색 글자 */
+    transition: border-bottom 0.3s ease, box-shadow 0.3s ease;
+    font-family: 'Pretendard-Regular', sans-serif;
+    -webkit-appearance: none; /* 기본 브라우저 스타일 제거 */
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* 이메일 및 생년월일 가로 정렬 */
+.email, .birthday {
+    display: flex; /* 가로 정렬 */
+    flex-direction: row;
+    gap: 10px; /* 요소 간 간격 */
+    align-items: center; /* 수직 가운데 정렬 */
+}
+
+/* 이메일 필드 크기 조정 */
+.email input[type='text'] {
+    flex: 2; /* 이메일 아이디 입력 필드 비율 */
+    padding: 10px;
+    border: 1px solid #333333;
+    border-radius: 4px;
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+.email select {
+    flex: 1; /* 도메인 선택 필드 비율 */
+    padding: 10px;
+    border: 1px solid #333333;
+    border-radius: 4px;
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+/* 생년월일 필드 크기 조정 */
+.birthday select {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #333333;
+    border-radius: 4px;
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+/* 공통 스크롤바 스타일 */
+*::-webkit-scrollbar {
+    width: 8px; /* 스크롤바 너비 */
+    height: 8px; /* 가로 스크롤바 높이 */
+}
+
+*::-webkit-scrollbar-track {
+    background: #262626; /* 트랙 배경색 */
+    border-radius: 4px; /* 둥근 모서리 */
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #00e6e6; /* 핸들 색상 */
+    border-radius: 4px; /* 둥근 모서리 */
+    transition: background 0.3s ease; /* 색상 전환 효과 */
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #ff00ff; /* 호버 시 색상 변경 */
+}
+select {
+    background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="7" viewBox="0 0 10 7"><path fill="%23ffffff" d="M0 0l5 5 5-5H0z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px 7px;
+}
+
+
+/* 드롭다운 포커스 스타일 */
+select:focus {
+    border-bottom: 1px solid #00e6e6; /* 네온 블루 */
+    box-shadow: 0 2px 6px #00e6e6; /* 네온 효과 */
+    background-color: #262626; /* 더 진한 배경 */
+}
+
+/* 반응형 미디어 쿼리 */
+@media (max-width: 800px) {
+    .container {
+        flex-direction: column; /* 모바일에서는 세로 정렬 */
+        gap: 20px;
+    }
+
+    h1 {
+        font-size: 28px; /* 폰트 크기 축소 */
+    }
+
+    .terms-content {
+        max-height: 180px; /* 모바일에서 약관 컨테이너 높이 축소 */
+    }
+
+    .email, .birthday {
+        flex-direction: column; /* 모바일에서는 세로 정렬 */
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 24px; /* 작은 화면에서 더 작은 타이틀 */
+    }
+
+    .form-container, .terms-container {
+        padding: 15px; /* 여백 축소 */
+        border-radius: 10px; /* 둥근 모서리 축소 */
+    }
+
+    input[type='text'],
+    input[type='password'],
+    select {
+        font-size: 14px; /* 입력 필드 폰트 크기 축소 */
+        height: 35px; /* 필드 높이 축소 */
+    }
+
+    .submit input {
+        padding: 10px; /* 버튼 크기 축소 */
+        font-size: 14px;
+    }
+}

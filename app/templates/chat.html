@@ -1,0 +1,461 @@
+{% extends "main.html" %}
+
+{% block content %}
+<div id="chat-container">
+
+    <!-- 중앙: 채팅 메시지 및 입력 -->
+    <div id="chat-section">
+        <div id="messages">
+            <!-- 채팅 메시지가 여기에 표시됩니다 -->
+        </div>
+        <div id="input-container">
+            <button id="attach-button" onclick="openAttachModal()">+</button>
+            <input type="text" id="message_input" placeholder="메시지를 입력하세요">
+            <button id="send-button" onclick="sendMessage()">보내기</button>
+        </div>
+    </div>
+
+    <!-- 우측: 관리자일 경우 채팅방 목록 및 제어판 표시 -->
+    {% if user_role == "admin" %}
+    <div id="admin-sidebar">
+        <h2>관리자 제어판</h2>
+
+        <!-- 검색창 -->
+        <input type="text" id="search_user_input" placeholder="유저 ID 검색">
+        <button onclick="searchUsers()">검색</button>
+
+        <!-- 유저 목록 -->
+        <h2>유저 목록</h2>
+        <ul id="users-list">
+            <!-- 유저 목록이 여기에 표시됩니다 -->
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- 이미지 첨부 모달 -->
+    <div id="attach-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAttachModal()">&times;</span>
+            <h2>이미지 첨부</h2>
+
+            <!-- 정사각형 드래그 앤 드롭 영역 -->
+            <div id="drop-area" class="drop-area">
+                <p>여기에 파일을 드래그하세요</p>
+                <input type="file" id="fileElem" accept="image/*" style="display:none;" onchange="handleFiles(this.files)">
+                <label class="button" for="fileElem">파일 선택</label>
+            </div>
+
+            <!-- 버튼 영역 -->
+            <div id="button-container">
+                <button onclick="openAttachModal()">파일 첨부</button>
+                <button onclick="openDrawingModal()">그림 그리기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 그림 그리기 모달 -->
+    <div id="drawing-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDrawingModal()">&times;</span>
+            <h2>그림 그리기</h2>
+            <canvas id="drawing-canvas" width="300" height="300"></canvas>
+            <br>
+            <button onclick="sendDrawing()">그림 전송</button>
+            <button onclick="clearCanvas()">지우기</button>
+        </div>
+    </div>
+
+</div>
+
+{% if user_role == "admin" %}
+<script>
+    let socket;
+    let selectedChatRoomId = "";
+
+    // 그림 그리기 관련 변수
+    let isDrawing = false;
+    let x = 0;
+    let y = 0;
+    const canvas = document.getElementById("drawing-canvas");
+    const context = canvas.getContext("2d");
+
+    // 모달 열기
+    function openAttachModal() {
+        document.getElementById("attach-modal").style.display = "flex"; // 'block'을 'flex'로 변경
+        document.getElementById("drawing-modal").style.display = "none";
+    }
+
+    // 모달 닫기
+    function closeAttachModal() {
+        document.getElementById("attach-modal").style.display = "none";
+    }
+
+    // 그림 그리기 모달 열기
+    function openDrawingModal() {
+        console.log("openDrawingModal 실행됨"); // 디버깅용
+        const modal = document.getElementById("drawing-modal");
+        if (modal) {
+            modal.style.display = "flex";
+            setCanvasSize(); // 동적 크기 설정 호출
+        } else {
+            console.error("drawing-modal 요소를 찾을 수 없습니다!");
+        }
+        document.getElementById("attach-modal").style.display = "none";
+    }
+
+    // 그림 그리기 모달 닫기
+    function closeDrawingModal() {
+        document.getElementById("drawing-modal").style.display = "none";
+        clearCanvas();
+    }
+    function setCanvasSize() {
+        const dropArea = document.querySelector('.drop-area');
+        const canvas = document.getElementById('drawing-canvas');
+        if (dropArea && canvas) {
+            const dropAreaWidth = dropArea.offsetWidth;
+            const dropAreaHeight = dropArea.offsetHeight;
+
+            // 캔버스 크기 동기화
+            canvas.style.width = `${dropAreaWidth}px`;
+            canvas.style.height = `${dropAreaHeight}px`;
+
+            // 내부 크기 (실제 드로잉 공간 크기)
+            canvas.width = dropAreaWidth;
+            canvas.height = dropAreaHeight;
+        }
+    }
+    // 드래그 앤 드롭 파일 업로드
+    let dropArea = document.getElementById('drop-area');
+
+    // Prevent default behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    // Highlight drop area when item is dragged over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        dropArea.classList.add('highlight');
+    }
+
+    function unhighlight(e) {
+        dropArea.classList.remove('highlight');
+    }
+
+    // Handle dropped files
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+
+        handleFiles(files);
+    }
+
+    function handleFiles(files) {
+        [...files].forEach(uploadFile);
+    }
+
+    function uploadFile(file) {
+        const maxSize = 5 * 1024 * 1024; // 5MB 제한
+        if (file.size > maxSize) {
+            alert("파일 크기가 너무 큽니다. 5MB 이하의 파일을 업로드하세요.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = function() {
+            const base64Image = reader.result;
+            sendImage(base64Image);
+        }
+    }
+
+    // 그림 그리기 시작
+    function startDrawing(event) {
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        x = event.clientX - rect.left;
+        y = event.clientY - rect.top;
+    }
+
+    // 그림 그리기
+    function draw(event) {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const newX = event.clientX - rect.left;
+        const newY = event.clientY - rect.top;
+        context.beginPath();
+        context.moveTo(x, y);
+        context.lineTo(newX, newY);
+        context.strokeStyle = "#00e6e6"; // 네온 블루 선
+        context.lineWidth = 2;
+        context.stroke();
+        x = newX;
+        y = newY;
+    }
+
+    // 그림 그리기 종료
+    function stopDrawing() {
+        isDrawing = false;
+    }
+
+    // 그림 전송
+    function sendDrawing() {
+        const dataURL = canvas.toDataURL("image/png");
+        sendImage(dataURL);
+        closeDrawingModal();
+    }
+
+    // 캔버스 초기화
+    function clearCanvas() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // 이미지 전송
+    function sendImage(base64Image) {
+        if (selectedChatRoomId === "" && "{{ user_role }}" === "admin") {
+            alert("먼저 유저를 선택하세요.");
+            return;
+        }
+
+        socket.send(JSON.stringify({
+            "message_type": "image",
+            "content": base64Image
+        }));
+    }
+
+    // WebSocket 연결
+    function connect() {
+        const userId = "{{ user_id }}";
+        const userRole = "{{ user_role }}";
+        // WebSocket URL에 user_id와 user_role을 쿼리 파라미터로 추가
+        socket = new WebSocket(`ws://localhost:8000/chat/ws?user_id=${userId}&user_role=${userRole}`);
+
+        socket.onopen = function() {
+            console.log("WebSocket 연결이 열렸습니다.");
+        };
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.type === "info") {
+                console.log(data.message);
+                return;
+            }
+            if (data.type === "error") {
+                alert(data.message);
+                return;
+            }
+            const messagesDiv = document.getElementById("messages");
+            const messageElement = document.createElement("p");
+            if (data.sender_id === "{{ user_id }}") {
+                messageElement.classList.add("user-message");
+            } else {
+                messageElement.classList.add("admin-message");
+            }
+
+            if (data.message_type === "image") {
+                const img = document.createElement("img");
+                img.src = data.message;
+                img.style.maxWidth = "200px";
+                img.style.maxHeight = "200px";
+                messageElement.appendChild(img);
+            } else {
+                messageElement.textContent = `${data.sender_id}: ${data.message}`;
+            }
+
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // 스크롤을 최신 메시지로 이동
+        };
+
+        socket.onclose = function() {
+            console.log("WebSocket 연결이 종료되었습니다.");
+        };
+
+        socket.onerror = function(error) {
+            console.error("WebSocket 오류:", error);
+        };
+    }
+
+    // 메시지 전송
+    function sendMessage() {
+        const messageInput = document.getElementById("message_input");
+        const message = messageInput.value.trim();
+        if (message === "") return;
+
+        if (selectedChatRoomId === "" && "{{ user_role }}" === "admin") {
+            alert("먼저 유저를 선택하세요.");
+            return;
+        }
+
+        socket.send(JSON.stringify({ "message_type": "text", "content": message }));
+        messageInput.value = "";
+    }
+
+    // 관리자인 경우 유저 목록을 가져와 표시
+    async function loadChatRooms() {
+        try {
+            const response = await fetch('/chat/chatrooms');
+            if (response.ok) {
+                const users = await response.json();
+                const usersList = document.getElementById("users-list");
+                usersList.innerHTML = ""; // 기존 목록 초기화
+
+                users.forEach(user => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${user.name || 'Unnamed User'} (ID: ${user.user_id})`;
+                    listItem.style.cursor = "pointer";
+                    listItem.style.padding = "10px";
+                    listItem.style.borderBottom = "1px solid #333333";
+                    listItem.style.backgroundColor = "#262626";
+                    listItem.style.borderRadius = "10px";
+                    listItem.style.marginBottom = "10px";
+                    listItem.style.transition = "background-color 0.3s ease, transform 0.2s";
+
+                    listItem.onclick = () => {
+                        selectChatRoom(user.user_id);
+                    };
+
+                    listItem.onmouseover = () => {
+                        listItem.style.backgroundColor = "#333333";
+                        listItem.style.transform = "scale(1.02)";
+                    };
+
+                    listItem.onmouseout = () => {
+                        listItem.style.backgroundColor = "#262626";
+                        listItem.style.transform = "scale(1)";
+                    };
+
+                    usersList.appendChild(listItem);
+                });
+            } else {
+                console.error("채팅방 목록을 불러오는 데 실패했습니다.");
+            }
+        } catch (error) {
+            console.error("채팅방 목록을 불러오는 중 오류가 발생했습니다:", error);
+        }
+    }
+
+    // 검색 기능
+    async function searchUsers() {
+        const searchInput = document.getElementById("search_user_input");
+        const query = searchInput.value.trim();
+        if (query === "") {
+            loadChatRooms(); // 검색어가 없으면 모든 유저 목록 다시 로드
+            return;
+        }
+
+        try {
+            const response = await fetch(`/chat/search_users?user_id=${encodeURIComponent(query)}`);
+            if (response.ok) {
+                const users = await response.json();
+                const usersList = document.getElementById("users-list");
+                usersList.innerHTML = ""; // 기존 목록 초기화
+
+                users.forEach(user => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${user.name || 'Unnamed User'} (ID: ${user.user_id})`;
+                    listItem.style.cursor = "pointer";
+                    listItem.style.padding = "10px";
+                    listItem.style.borderBottom = "1px solid #333333";
+                    listItem.style.backgroundColor = "#262626";
+                    listItem.style.borderRadius = "10px";
+                    listItem.style.marginBottom = "10px";
+                    listItem.style.transition = "background-color 0.3s ease, transform 0.2s";
+
+                    listItem.onclick = () => {
+                        selectChatRoom(user.user_id);
+                    };
+
+                    listItem.onmouseover = () => {
+                        listItem.style.backgroundColor = "#333333";
+                        listItem.style.transform = "scale(1.02)";
+                    };
+
+                    listItem.onmouseout = () => {
+                        listItem.style.backgroundColor = "#262626";
+                        listItem.style.transform = "scale(1)";
+                    };
+
+                    usersList.appendChild(listItem);
+                });
+            } else {
+                console.error("유저 검색에 실패했습니다.");
+            }
+        } catch (error) {
+            console.error("유저 검색 중 오류가 발생했습니다:", error);
+        }
+    }
+
+    // 채팅방 선택
+    function selectChatRoom(userId) {
+        if (userId === selectedChatRoomId) {
+            alert("이미 선택된 채팅방입니다.");
+            return;
+        }
+
+        // 유저 ID를 기반으로 채팅방 선택 요청
+        socket.send(JSON.stringify({ "message_type": "select_user", "content": userId }));
+
+        selectedChatRoomId = userId;
+        alert(`유저 ID ${userId}와의 채팅방이 선택되었습니다.`);
+    }
+
+    // 페이지 로드 시 WebSocket 연결 및 채팅방 목록 로드 (관리자인 경우)
+    window.onload = () => {
+        connect();
+        {% if user_role == "admin" %}
+        loadChatRooms();
+        {% endif %}
+
+        // 페이지 로드 시 캔버스 크기 설정
+        setCanvasSize();
+
+        // 그림 그리기 이벤트 리스너
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+    };
+
+
+    // 메시지 입력 필드에 엔터키로 메시지 전송
+    document.addEventListener("DOMContentLoaded", function() {
+        const messageInput = document.getElementById("message_input");
+        if (messageInput) {
+            messageInput.addEventListener("keydown", function(event) {
+                if (event.key === "Enter") {
+                    sendMessage();
+                }
+            });
+        }
+    });
+
+    // 모달 밖을 클릭하면 모달 닫기
+    window.onclick = function(event) {
+        const attachModal = document.getElementById("attach-modal");
+        const drawingModal = document.getElementById("drawing-modal");
+        if (event.target == attachModal) {
+            attachModal.style.display = "none";
+        }
+        if (event.target == drawingModal) {
+            drawingModal.style.display = "none";
+            clearCanvas();
+        }
+    }
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>사용자 로그인</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/login.css">
+</head>
+<body>
+<div class="main">
+    <div class="subMain">
+        {% if message %}
+        <div id="successModal" class="modal">
+            <div class="modal-content">
+                <p>{{ message }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if loginFail %}
+        <div id="errorModal" class="modal">
+            <div class="modal-content">
+                <p>{{ errorMessage }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <form action="/login" method="post">
+            <h1><a href="/post">Aries</a></h1>
+            <div>
+                <div class="form-id">
+                    <div class="form-id-in">
+                        <input type="text" id="userId" name="userId" placeholder="아이디" required><br>
+                    </div>
+                </div>
+                <div class="form-pwd">
+                    <input type="password" id="password" name="password" placeholder="비밀번호" required>
+                </div>
+                <div class="form-cbox">
+                    <label class="cbox">
+                        <input type="checkbox" id="check"> 아이디 저장
+                    </label>
+                    <div class="find">
+                        <a href="/find">아이디/비밀번호 찾기</a>
+                    </div>
+                </div>
+                <div class="login">
+                    <button type="submit">Login</button>
+                </div>
+            </div>
+            <div class="horizon">또는</div>
+            <div class="login-another">
+                <a href="/oauth2/authorization/google">
+                    <img class="round-icon" src="/static/images/googlelog.png" alt="Google">
+                </a>
+                <a href="/oauth2/authorization/naver">
+                    <img class="round-icon" src="/static/images/naverlog.png" alt="Naver">
+                </a>
+                <a href="/oauth2/authorization/kakao">
+                    <img class="square-icon" src="/static/images/kakaolog.png" alt="Kakao">
+                </a>
+            </div>
+        </form>
+    </div>
+    <div class="join">
+        <p>Aries가 처음이세요? <a href="/join">회원 가입</a></p>
+    </div>
+</div>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const successModal = document.getElementById('successModal');
+        const errorModal = document.getElementById('errorModal');
+        const checkbox = document.getElementById('check'); // 아이디 저장 체크박스
+        const userIdInput = document.getElementById('userId'); // 아이디 입력 필드
+
+        // 모달 창 보이기
+        if (successModal) successModal.style.display = 'block';
+        if (errorModal) errorModal.style.display = 'block';
+
+        // LocalStorage에서 저장된 아이디 불러오기
+        const savedId = localStorage.getItem('savedUserId');
+        if (savedId) {
+            userIdInput.value = savedId; // 저장된 아이디를 입력 필드에 채움
+            checkbox.checked = true; // 체크박스를 활성화
+        }
+
+        // 체크박스 상태 변화 이벤트
+        checkbox.addEventListener('change', function () {
+            if (checkbox.checked) {
+                if (userIdInput.value) {
+                    localStorage.setItem('savedUserId', userIdInput.value); // 입력된 아이디 저장
+                }
+            } else {
+                localStorage.removeItem('savedUserId'); // 체크 해제 시 저장된 아이디 삭제
+            }
+        });
+
+        // 아이디 입력 필드 값이 변경될 때 저장
+        userIdInput.addEventListener('input', function () {
+            if (checkbox.checked) {
+                localStorage.setItem('savedUserId', userIdInput.value); // 체크박스가 활성화된 경우에만 저장
+            }
+        });
+
+        // 모달 창 닫기 로직
+        window.addEventListener('click', function (event) {
+            if (event.target === successModal) successModal.style.display = 'none';
+            if (event.target === errorModal) errorModal.style.display = 'none';
+        });
+    });
+
+    // 모달 닫기 버튼 클릭 시 작동
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.style.display = 'none';
+    }
+
+</script>
+</html>

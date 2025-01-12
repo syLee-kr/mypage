@@ -1,0 +1,212 @@
+/* 글로벌 Box Sizing 설정 */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* 바디 스타일 */
+body {
+    height: 100vh;
+    margin: 0;
+    font-family: 'Pretendard-Regular', sans-serif;
+    background-color: #0d0d0d; /* 어두운 배경 */
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* 모달 배경 / 컨테이너 */
+.modal {
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(13, 13, 13, 0.85); /* 어두운 반투명 배경 */
+    display: none; /* 기본 숨김 */
+    overflow: auto; /* 모달 내용이 길어질 경우 스크롤 */
+}
+
+/* 모달 박스 */
+.modal-content {
+    background-color: #1a1a1a; /* 기존 다크 테마에 맞춘 배경색 */
+    margin: 5% auto; /* 상단 여백 증가 */
+    padding: 2rem; /* 패딩 증가 */
+    border-radius: 10px;
+    width: 50%; /* 너비 증가 */
+    min-width: 300px;
+    max-width: 700px;
+    position: relative;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* 자식 요소들이 부모의 너비에 맞춰 확장 */
+}
+
+/* 모달 내용의 모든 직접 자식 요소에 너비 100% 적용 */
+.modal-content > * {
+    width: 100%;
+}
+
+/* 닫기 버튼 */
+.close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    font-size: 1.5rem;
+    color: #b3b3b3; /* 밝은 회색 */
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-button:hover {
+    color: #ff00ff; /* 호버 시 네온 핑크 */
+}
+
+/* 모달 제목 */
+.modal-content h2 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+    color: #00e6e6; /* 네온 블루 */
+    text-align: center;
+    font-family: 'SBAggroB', serif;
+}
+
+/* 드래그 영역 */
+.image-drag-area {
+    position: relative;
+    border: 2px dashed #555555; /* 다크 회색 */
+    border-radius: 8px;
+    padding: 1rem;
+    min-height: 220px; /* 이미지 영역 최소 높이 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    cursor: pointer; /* 클릭 가능 */
+    transition: border-color 0.2s, background-color 0.2s;
+    flex-direction: column;
+    background-color: #262626; /* 기본 배경색 */
+}
+
+.image-drag-area.drag-over {
+    border-color: #00e6e6; /* 네온 블루 */
+    background-color: #333333; /* 배경색 변경 */
+}
+
+/* 좌우 버튼 */
+.image-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: rgba(0, 0, 0, 0.6); /* 더 진한 배경 */
+    color: #ffffff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 1rem;
+    cursor: pointer;
+    display: none; /* 기본적으로 이미지가 여러 장일 때만 보이게 */
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.image-nav:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: translateY(-50%) scale(1.1); /* 호버 시 약간 확대 */
+}
+
+.image-nav.left {
+    left: 10px;
+}
+
+.image-nav.right {
+    right: 10px;
+}
+
+/* 미리보기 영역 */
+.image-preview {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    max-width: 100%;
+}
+
+/* 표시되는 이미지 */
+.image-preview img {
+    max-width: 100%;
+    max-height: 300px; /* 너무 높아지지 않도록 제한 */
+    object-fit: contain; /* 이미지 비율 유지 */
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* 공개 여부 체크박스 */
+.public-check-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+}
+
+.public-check-label input[type='checkbox'] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #00e6e6; /* 네온 블루 체크 표시 */
+}
+
+/* 텍스트 영역 */
+.modal-content textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-height: 100px;
+    resize: vertical;
+    padding: 0.8rem;
+    border-radius: 5px;
+    border: 1px solid #555555; /* 다크 회색 */
+    background-color: #333333; /* 어두운 배경 */
+    color: #ffffff;
+    font-size: 1rem;
+    margin: 0 0 1.5rem 0; /* 좌우 마진 제거, 아래 마진만 유지 */
+    outline: none;
+    transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.modal-content textarea:focus {
+    border: 1px solid #00e6e6; /* 네온 블루 */
+    box-shadow: 0 0 5px #00e6e6;
+}
+
+/* 작성 버튼 */
+#create-post-submit {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #00e6e6; /* 네온 블루 */
+    border: none;
+    color: #0d0d0d; /* 어두운 텍스트 */
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+#create-post-submit:hover {
+    background-color: #ff00ff; /* 호버 시 네온 핑크 */
+    transform: translateY(-2px);
+    box-shadow: 0 0 10px #ff00ff;
+}

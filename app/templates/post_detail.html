@@ -1,0 +1,32 @@
+<!-- 예: post_detail.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>게시글 상세</title>
+</head>
+<body>
+<h1>게시글 상세</h1>
+
+<div class="post" id="post-{{ post.id }}">
+    <h3>{{ post.content }}</h3>
+
+    <!-- 이미지, likes 등 필요시 추가 -->
+    <h4>전체 댓글 ({{ post.comments|length }}개)</h4>
+    {% if post.comments|length == 0 %}
+    <p>댓글 없음</p>
+    {% else %}
+    {% for c in post.comments %}
+    <div class="comment">
+        <span class="author">{{ c.user_id }}</span>:
+        <span class="content">{{ c.content }}</span>
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+
+<!-- 목록 페이지로 돌아가기 버튼 -->
+<a href="/post">목록으로</a>
+
+</body>
+</html>

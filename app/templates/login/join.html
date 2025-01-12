@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/join.css">
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"
+            integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="container">
+    <!-- 회원정보 입력 -->
+    <div class="form-container">
+        <form action="/join" method="post" onsubmit="return validateForm()">
+            <h1><a href="/login">Aries</a></h1>
+            <div class="email">
+                <input type="text" id="emailPrefix" placeholder="이메일 아이디" required>
+                <select id="emailDomain" required>
+                    <option value="" disabled selected>도메인 선택</option>
+                    <option value="@gmail.com">@gmail.com</option>
+                    <option value="@naver.com">@naver.com</option>
+                    <option value="@daum.net">@daum.net</option>
+                    <option value="@hotmail.com">@hotmail.com</option>
+                    <option value="@nate.com">@nate.com</option>
+                    <option value="custom">직접 입력</option>
+                </select>
+                <input type="text" id="customDomain" placeholder="도메인 직접 입력" style="display: none;">
+            </div>
+            <div id="checkResult" class="check-result"></div>
+            <input type="hidden" id="userId" name="user_id">
+            <input type="password" id="pwd" name="password" placeholder="비밀번호" required>
+            <input type="password" id="pwd2" placeholder="비밀번호 확인" required>
+            <input type="text" id="name" name="name" placeholder="이름" required>
+            <div class="birthday">
+                <select id="birthYear" required></select>
+                <select id="birthMonth" required></select>
+                <select id="birthDay" required></select>
+                <input type="hidden" id="birthday" name="birthday">
+            </div>
+            <input type="text" id="phone" name="phone" placeholder="연락처 입력" required>
+            <button type="submit" class="submit-btn">가입하기</button>
+        </form>
+    </div>
+
+    <!-- 약관 컨테이너 -->
+    <div class="terms-container">
+        <h2>회원가입 약관</h2>
+        <div id="termsContent" class="terms-content">
+        </div>
+        <div class="agreement">
+            <input type="checkbox" id="agreeTerms">
+            <label for="agreeTerms">약관에 동의합니다.</label>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        populateBirthYear();
+        populateBirthMonth();
+        populateBirthDay();
+
+        const emailPrefixElement = document.getElementById('emailPrefix');
+        const emailDomainElement = document.getElementById('emailDomain');
+        const customDomainElement = document.getElementById('customDomain');
+        const userIdElement = document.getElementById('userId');
+        const checkResultElement = document.getElementById('checkResult');
+
+        // 이메일 입력 및 도메인 선택에 따라 user_id 업데이트
+        function updateUserId() {
+            const prefix = emailPrefixElement.value.trim();
+            const domain = emailDomainElement.value === "custom"
+                ? customDomainElement.value.trim()
+                : emailDomainElement.value;
+            userIdElement.value = prefix && domain ? prefix + domain : '';
+            checkUserIdAvailability();
+        }
+
+        emailPrefixElement.addEventListener('input', updateUserId);
+
+        emailDomainElement.addEventListener('change', function () {
+            if (emailDomainElement.value === "custom") {
+                emailDomainElement.style.display = "none";
+                customDomainElement.style.display = "block";
+                customDomainElement.setAttribute("required", "required");
+            } else {
+                emailDomainElement.style.display = "inline-block";
+                customDomainElement.style.display = "none";
+                customDomainElement.removeAttribute("required");
+                customDomainElement.value = "";
+            }
+            updateUserId();
+        });
+
+        customDomainElement.addEventListener('input', updateUserId);
+
+        // 실시간 중복 확인
+        async function checkUserIdAvailability() {
+            const userId = userIdElement.value.trim();
+            if (!userId) {
+                checkResultElement.textContent = "이메일 아이디와 도메인을 입력해주세요.";
+                checkResultElement.style.color = "red";
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/check", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_id: userId }),
+                });
+
+                if (response.ok) {
+                    const successData = await response.json();
+                    checkResultElement.textContent = successData.message;
+                    checkResultElement.style.color = "green";
+                } else {
+                    const errorData = await response.json();
+                    checkResultElement.textContent = errorData.detail;
+                    checkResultElement.style.color = "red";
+                }
+            } catch (error) {
+                console.error("중복 확인 요청 오류:", error);
+                checkResultElement.textContent = "중복 확인 중 문제가 발생했습니다.";
+                checkResultElement.style.color = "red";
+            }
+        }
+
+        // 약관 내용을 동적으로 로드
+        fetch('/static/text/termsAndConditions.txt')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('약관을 불러오는 데 실패했습니다.');
+                }
+                return response.text();
+            })
+            .then(text => {
+                document.getElementById('termsContent').innerText = text;
+            })
+            .catch(error => {
+                console.error('약관 로드 오류:', error);
+                document.getElementById('termsContent').innerText = '약관을 불러오는 데 실패했습니다.';
+            });
+    });
+
+    function populateBirthYear() {
+        const yearSelect = document.getElementById('birthYear');
+        const currentYear = new Date().getFullYear();
+        for (let y = currentYear; y >= currentYear - 100; y--) {
+            yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
+        }
+    }
+
+    function populateBirthMonth() {
+        const monthSelect = document.getElementById('birthMonth');
+        for (let m = 1; m <= 12; m++) {
+            monthSelect.innerHTML += `<option value="${m}">${m}</option>`;
+        }
+    }
+
+    function populateBirthDay() {
+        const daySelect = document.getElementById('birthDay');
+        for (let d = 1; d <= 31; d++) {
+            daySelect.innerHTML += `<option value="${d}">${d}</option>`;
+        }
+    }
+</script>
+</body>
+</html>

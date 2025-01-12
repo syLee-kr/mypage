@@ -1,0 +1,435 @@
+.content {
+    display: flex;
+    flex: 1;
+    position: relative;
+}
+#chat-container {
+    display: flex;
+    flex: 1;  /* 부모 컨테이너의 남은 공간을 차지 */
+    background-color: #1a1a1a; /* 채팅 페이지 배경 */
+    overflow: hidden; /* 내부 스크롤 방지 */
+}
+/* 중앙 채팅 섹션 */
+#chat-section {
+    flex: 1; /* 남은 공간 모두 차지 */
+    display: flex;
+    flex-direction: column;
+    background-color: #0d0d0d; /* 어두운 배경 */
+}
+
+/* 채팅 메시지 표시 영역 */
+#messages {
+    flex: 1; /* 남은 공간 모두 차지 */
+    padding: 20px;
+    overflow-y: auto; /* 세로 스크롤 허용 */
+    background-color: #1a1a1a; /* 진한 그레이 배경 */
+
+    /* 스크롤바 숨기기 */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+}
+
+#messages::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+/* 메시지 스타일 */
+#messages p {
+    margin: 10px 0;
+    padding: 10px 15px;
+    border-radius: 20px;
+    max-width: 70%;
+    word-wrap: break-word;
+    position: relative;
+    font-size: 14px;
+}
+
+/* 사용자 메시지 (오른쪽 정렬) */
+#messages .user-message {
+    background-color: #00e6e6; /* 네온 블루 배경 */
+    color: #0d0d0d;
+    align-self: flex-end;
+    border-bottom-right-radius: 0;
+}
+
+/* 관리자 메시지 (왼쪽 정렬) */
+#messages .admin-message {
+    background-color: #ff00ff; /* 네온 핑크 배경 */
+    color: #ffffff;
+    align-self: flex-start;
+    border-bottom-left-radius: 0;
+}
+
+/* 메시지 입력 영역 */
+#input-container {
+    display: flex;
+    padding: 10px 20px;
+    background-color: #262626; /* 어두운 입력 필드 배경 */
+}
+
+/* 메시지 입력 필드 */
+#input-container input[type='text'] {
+    flex: 1;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    font-size: 14px;
+    outline: none;
+    margin-right: 10px;
+}
+
+/* 메시지 전송 버튼 */
+#input-container button {
+    padding: 8px 12px; /* 패딩 줄이기 */
+    width: 80px; /* 버튼의 고정 너비 설정 */
+    border: none;
+    border-radius: 20px;
+    background-color: #00e6e6; /* 네온 블루 버튼 */
+    color: #0d0d0d;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+    flex-shrink: 0; /* 버튼이 줄어들지 않도록 설정 */
+}
+
+#input-container button:hover {
+    background-color: #ff00ff; /* 네온 핑크 */
+    transform: scale(1.05);
+}
+
+#input-container button:active {
+    transform: scale(0.95);
+}
+
+/* 관리자 사이드바 스타일링 */
+#admin-sidebar {
+    flex: 0 0 300px; /* 고정된 너비 */
+    background-color: #1a1a1a;
+    padding: 20px;
+    border-left: 1px solid #333333;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.8);
+    overflow-y: auto; /* 내부 수직 스크롤 허용 */
+    overflow-x: hidden; /* 수평 스크롤 숨기기 */
+    box-sizing: border-box; /* 패딩과 보더 포함한 크기 계산 */
+}
+/* 관리자 제어판 제목 */
+#admin-sidebar h2 {
+    color: #00e6e6; /* 네온 블루 */
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* 관리자 제어판 입력 필드 */
+#admin-controls input[type='text'] {
+    width: 90%;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    background-color: #262626;
+    color: #ffffff;
+    font-size: 14px;
+    outline: none;
+    margin-bottom: 10px;
+}
+
+/* 관리자 제어판 버튼 */
+#admin-controls button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    background-color: #00e6e6; /* 네온 블루 버튼 */
+    color: #0d0d0d;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+    margin-bottom: 10px;
+}
+
+#admin-controls button:hover {
+    background-color: #ff00ff; /* 네온 핑크 */
+    transform: scale(1.05);
+}
+
+#admin-controls button:active {
+    transform: scale(0.95);
+}
+
+/* 유저 목록 스타일 */
+#users-list li {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #262626;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+}
+
+#users-list li:hover {
+    background-color: #333333;
+    transform: scale(1.02);
+}
+
+#users-list li:active {
+    transform: scale(0.98);
+}
+
+#users-list li.selected {
+    background-color: #ff00ff; /* 선택된 유저 네온 핑크 */
+    color: #ffffff;
+}
+
+input[type='text'], input[type='password'] {
+    width: calc(100% - 28px);
+    padding: 12px;
+    margin: 0 auto;
+    border-radius: 8px;
+    border: 1px solid #333333;
+    background-color: #262626; /* 어두운 입력 필드 */
+    color: #ffffff;
+    font-size: 15px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type='text']:focus, input[type='password']:focus {
+    border-color: #00e6e6; /* 포커스 네온 블루 */
+    box-shadow: 0 0 8px #00e6e6; /* 네온 효과 */
+    outline: none;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 30px;
+    border: none;
+    background-color: #00e6e6; /* 네온 블루 버튼 */
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.3s, box-shadow 0.3s ease;
+}
+
+button:hover {
+    background-color: #ff00ff; /* 네온 핑크 */
+    transform: scale(1.05);
+    box-shadow: 0 0 12px #ff00ff; /* 네온 효과 */
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+
+/* 로그인 다른 방법 */
+.login-another {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+    gap: 20px;
+}
+
+/* 회원가입 링크 스타일 */
+div.join {
+    margin-top: 20px;
+    font-size: 14px;
+    text-align: center;
+    color: #b3b3b3;
+}
+
+div.join a {
+    color: #00e6e6;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+div.join a:hover {
+    color: #ff00ff;
+}
+
+.modal {
+    display: none; /* 기본적으로 숨김 */
+    position: fixed; /* 고정 위치 */
+    z-index: 1; /* 다른 요소들보다 위에 표시 */
+    left: 0;
+    top: 0;
+    width: 100%; /* 전체 너비 */
+    height: 100%; /* 전체 높이 */
+    overflow: auto; /* 필요 시 스크롤 */
+    background-color: rgba(0, 0, 0, 0.7); /* 반투명 검정 배경 */
+    justify-content: center;
+    align-items: center;
+}
+
+/* 모달 내용 */
+.modal-content {
+    background-color: #262626; /* 어두운 배경 */
+    padding: 20px;
+    border: 2px solid #00e6e6; /* 네온 블루 테두리 */
+    width: 350px; /* 너비 */
+    border-radius: 10px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0, 230, 230, 0.5); /* 네온 블루 그림자 */
+    color: #ffffff; /* 흰색 텍스트 */
+}
+
+/* 닫기 버튼 */
+.close {
+    color: #00e6e6; /* 네온 블루 색상 */
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover,
+.close:focus {
+    color: #ff00ff; /* 네온 핑크로 변경 */
+}
+
+/* '+' 버튼 스타일 */
+#attach-button {
+    background-color: #00e6e6; /* 네온 블루 */
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    margin-right: 10px;
+    transition: background-color 0.3s ease, transform 0.2s;
+}
+
+#attach-button:hover {
+    background-color: #ff00ff; /* 네온 핑크 */
+    transform: scale(1.05);
+}
+
+/* 채팅 입력 및 버튼 스타일 */
+#input-container {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #262626; /* 어두운 입력 필드 배경 */
+}
+
+/* 메시지 입력 필드 */
+#message_input {
+    flex: 1;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    font-size: 14px;
+    outline: none;
+    margin-right: 10px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#message_input:focus {
+    outline: none;
+    border-color: #00e6e6; /* 포커스 네온 블루 */
+    box-shadow: 0 0 8px #00e6e6; /* 네온 효과 */
+}
+
+/* 메시지 전송 버튼 */
+#send-button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    background-color: #00e6e6; /* 네온 블루 버튼 */
+    color: #0d0d0d;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+    flex-shrink: 0; /* 버튼이 줄어들지 않도록 설정 */
+}
+
+#send-button:hover {
+    background-color: #ff00ff; /* 네온 핑크 */
+    transform: scale(1.05);
+}
+
+#send-button:active {
+    transform: scale(0.95);
+}
+
+/* 드래그 앤 드롭 영역 스타일 */
+.drop-area {
+    border: 2px dashed #00e6e6; /* 네온 블루 경계선 */
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+    width: 300px; /* 고정된 너비 */
+    height: 300px; /* 고정된 높이 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #1a1a1a; /* 진한 그레이 배경 */
+    color: #ffffff; /* 흰색 텍스트 */
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.drop-area.highlight {
+    border-color: #ff00ff; /* 드래그 시 네온 핑크로 변경 */
+    background-color: #333333; /* 드래그 시 배경색 변경 */
+}
+
+.drop-area p {
+    margin: 0;
+    font-size: 16px;
+    color: #00e6e6; /* 네온 블루 텍스트 */
+}
+
+/* 버튼 컨테이너 스타일 */
+#button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#button-container button {
+    padding: 10px;
+    background-color: #00e6e6; /* 네온 블루 버튼 */
+    color: #0d0d0d;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+}
+
+#button-container button:hover {
+    background-color: #ff00ff; /* 네온 핑크로 변경 */
+    transform: scale(1.05);
+}
+
+/* 그림 그리기 캔버스 스타일 */
+#drawing-canvas {
+    border: 2px solid #00e6e6; /* 네온 블루 테두리 */
+    border-radius: 10px;
+    background-color: #1a1a1a; /* 진한 그레이 배경 */
+    width: 300px; /* 드래그 앤 드롭 영역과 동일한 너비 */
+    height: 300px; /* 드래그 앤 드롭 영역과 동일한 높이 */
+    display: block;
+    margin: 0 auto; /* 중앙 정렬 */
+}
+
+/* 그림 그리기 버튼 스타일 (모달 내) */
+#drawing-modal button {
+    background-color: #00e6e6; /* 네온 블루 버튼 */
+    color: #0d0d0d;
+}
+
+#drawing-modal button:hover {
+    background-color: #ff00ff; /* 네온 핑크로 변경 */
+    transform: scale(1.05);
+}

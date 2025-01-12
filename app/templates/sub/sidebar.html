@@ -1,0 +1,48 @@
+<!-- app/templates/sidebar.html -->
+
+<div class="menu_sidebar">
+    <ul class="menu">
+        <li><a id="home-button" href="/post">
+            <span class="icon"><img src="/static/images/home.png" alt="홈 아이콘"></span> 홈
+        </a></li>
+        <li><a href="/chat">
+            <span class="icon"><img src="/static/images/message.png" alt="메세지 아이콘"></span> 메시지
+        </a></li>
+        <li><a href="/main">
+            <span class="icon"><img src="/static/images/alarm.png" alt="알림 아이콘"></span> 알림
+        </a></li>
+        <li><a href="/shop">
+            <span class="icon"><img src="/static/images/shop.png" alt="마켓 아이콘"></span> 마켓
+        </a></li>
+        <li><a href="/profile">
+            <span class="icon"><img src="/static/images/profile.png" alt="프로필 아이콘"></span> 프로필
+        </a></li>
+        <li><a href="/api/calendar">
+            <span class="icon"><img src="/static/images/calendar.png" alt="캘린더 아이콘"></span> 블로그 일정
+        </a></li>
+
+        {% if user_role == "admin" %}
+        <li><a href="#" id="open-create-post-modal">
+            <span class="icon"><img src="/static/images/plus.png" alt="게시글 작성 아이콘" /></span>
+            게시글 작성
+        </a></li>
+        {% endif %}
+
+        {% if user is not none %}
+        <li><a href="/login/logout">
+            <span class="icon"><img src="/static/images/logout.png" alt="로그아웃 아이콘"></span> 로그아웃
+        </a></li>
+        {% else %}
+        <li><a href="/login">
+            <span class="icon"><img src="/static/images/login.png" alt="로그인 아이콘"></span> 로그인
+        </a></li>
+        {% endif %}
+
+        <li><a href="/setting">
+            <span class="icon"><img src="/static/images/setting.png" alt="설정 아이콘"></span> 설정
+        </a></li>
+    </ul>
+    <div class="logo">
+        <h1><a href="/login">Aries</a></h1>
+    </div>
+</div>

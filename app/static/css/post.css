@@ -1,0 +1,548 @@
+/* post.css */
+
+/* 1. 게시글 컨테이너 */
+.post-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    max-width: 600px; /* 인스타그램은 보통 중앙 정렬에 초점을 맞춤 */
+    margin: 0 auto;
+}
+
+/* 2. 개별 게시글 카드 */
+.post {
+    background-color: #1a1a1a; /* 다크 회색 배경 */
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.post:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+}
+
+/* 3. 게시글 헤더 */
+.post-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: #262626; /* 더 진한 다크 회색 */
+}
+
+.profile-pic {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+    border: 2px solid #00e6e6; /* 네온 블루 테두리 */
+}
+
+.author-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* 4. 게시글 이미지 */
+.post-image {
+    position: relative;
+    width: 100%;
+    background-color: #000000;
+}
+
+.post-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 이미지 슬라이더용 */
+.post-image .carousel {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.post-image .carousel img {
+    width: 100%;
+    height: auto;
+    display: none;
+}
+
+.post-image .carousel img.active {
+    display: block;
+}
+
+/* 5. 게시글 내용 */
+.post-content {
+    padding: 15px;
+    font-size: 1rem;
+    color: #e0e0e0;
+    line-height: 1.5;
+}
+
+/* 6. 게시글 액션 */
+.post-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px 15px 15px;
+    color: #ffffff;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* 인스타그램은 버튼 간격을 더 넓게 설정 */
+}
+
+.like-button, .comment-button, .share-button, .save-button {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.like-button.liked {
+    color: #ff00ff; /* 네온 핑크로 변경 */
+}
+
+.like-button:hover, .comment-button:hover, .share-button:hover, .save-button:hover {
+    transform: scale(1.2);
+    color: #00e6e6; /* 네온 블루로 변경 */
+}
+
+.likes-count {
+    font-size: 0.9rem;
+    color: #b3b3b3;
+}
+
+/* 7. 댓글 섹션 */
+.post-comments {
+    padding: 0 15px 15px 15px;
+    color: #ffffff;
+}
+
+.post-comments h4 {
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    color: #00e6e6; /* 네온 블루 */
+}
+
+.comments {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.comment {
+    background-color: #262626;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    color: #e0e0e0;
+}
+
+.show-more-comments {
+    background: none;
+    border: none;
+    color: #00e6e6; /* 네온 블루 */
+    cursor: pointer;
+    font-size: 0.95rem;
+    padding: 5px 0;
+    text-align: left;
+    transition: color 0.3s ease;
+}
+
+.show-more-comments:hover {
+    color: #ff00ff; /* 호버 시 네온 핑크 */
+}
+
+.paginated-comments {
+    margin-top: 10px;
+}
+
+.comments-list .comment {
+    background-color: #333333;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.pagination-controls button {
+    background-color: #1a1a1a;
+    border: 1px solid #555555;
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+    background-color: #00e6e6; /* 네온 블루 */
+    transform: scale(1.05);
+}
+
+.pagination-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-buttons button {
+    background-color: #1a1a1a;
+    border: 1px solid #555555;
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.page-buttons button.active {
+    background-color: #00e6e6; /* 네온 블루 */
+    border-color: #00e6e6;
+    color: #0d0d0d; /* 어두운 텍스트 */
+}
+
+.page-buttons button:hover:not(.active) {
+    background-color: #00e6e6;
+    color: #0d0d0d;
+    transform: scale(1.05);
+}
+
+/* 8. 댓글 입력 컨테이너 */
+.comment-input-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.comment-input-container input[type="text"] {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #262626;
+    color: #ffffff;
+    font-size: 0.95rem;
+    outline: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.comment-input-container input[type="text"]:focus {
+    background-color: #333333;
+    box-shadow: 0 0 5px #00e6e6;
+}
+
+.comment-input-container button {
+    padding: 10px 15px;
+    background-color: #00e6e6; /* 네온 블루 */
+    border: none;
+    border-radius: 5px;
+    color: #0d0d0d; /* 어두운 텍스트 */
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.comment-input-container button:hover {
+    background-color: #ff00ff; /* 네온 핑크 */
+    transform: translateY(-2px);
+    box-shadow: 0 0 10px #ff00ff;
+}
+
+/* 9. 게시글 수정 및 삭제 버튼 */
+.post .post-actions button {
+    border: none;
+    color: #ff0000;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.post .post-actions button:hover {
+    background-color: #ff00ff; /* 호버 시 네온 핑크 */
+    transform: scale(1.05);
+}
+
+/* 10. 로딩 스피너 */
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #ffffff;
+    border-top: 5px solid #00e6e6; /* 네온 블루 */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+.like-button {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.like-button.liked {
+    color: #ff00ff; /* 좋아요 클릭 시 네온 핑크 */
+}
+
+.like-button:hover {
+    transform: scale(1.2);
+    color: #00e6e6; /* 호버 시 네온 블루 */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 11. 반응형 디자인 */
+@media (max-width: 768px) {
+    .post-container {
+        padding: 10px;
+    }
+
+    .post {
+        margin: 0;
+    }
+
+    .post-header {
+        padding: 10px;
+    }
+
+    .profile-pic {
+        width: 40px;
+        height: 40px;
+        margin-right: 10px;
+    }
+
+    .author-name {
+        font-size: 1rem;
+    }
+
+    .post-content {
+        padding: 10px;
+        font-size: 0.95rem;
+    }
+
+    .post-actions {
+        padding: 0 10px 10px 10px;
+    }
+
+    .likes-count {
+        font-size: 0.8rem;
+    }
+
+    .post-comments h4 {
+        font-size: 1rem;
+    }
+
+    .comment-input-container input[type="text"] {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+
+    .comment-input-container button {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .post-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .profile-pic {
+        width: 35px;
+        height: 35px;
+        margin-bottom: 5px;
+    }
+
+    .author-name {
+        font-size: 0.95rem;
+    }
+
+    .post-content {
+        font-size: 0.9rem;
+    }
+
+    .like-button {
+        font-size: 1.3rem;
+    }
+
+    .likes-count {
+        font-size: 0.75rem;
+    }
+
+    .post-actions {
+        padding: 0 10px 10px 10px;
+    }
+
+    .comment-input-container {
+        flex-direction: column;
+    }
+
+    .comment-input-container button {
+        width: 100%;
+    }
+}
+.post-comments {
+    padding: 15px;
+    background-color: #1a1a1a;
+    border-top: 1px solid #333333;
+}
+
+.comment-header {
+    font-size: 0.9rem;
+    color: #b3b3b3;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.comment-count {
+    color: #fff;
+}
+
+.comments {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.comment {
+    display: flex;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #e0e0e0;
+}
+
+.comment-author {
+    font-weight: bold;
+    color: #fff;
+}
+
+.comment-text {
+    color: #b3b3b3;
+}
+
+.show-more-comments {
+    background: none;
+    border: none;
+    color: #00e6e6;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 5px 0;
+    transition: color 0.3s;
+}
+
+.show-more-comments:hover {
+    color: #ff00ff;
+}
+
+.no-comments {
+    font-size: 0.9rem;
+    color: #b3b3b3;
+    text-align: center;
+}
+
+/* 댓글 입력 폼 스타일 */
+.comment-input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.comment-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #333333;
+    border-radius: 5px;
+    background-color: #262626;
+    color: #fff;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.comment-input:focus {
+    border-color: #00e6e6;
+    box-shadow: 0 0 5px #00e6e6;
+}
+
+.comment-submit {
+    padding: 10px 15px;
+    background-color: #00e6e6;
+    border: none;
+    border-radius: 5px;
+    color: #1a1a1a;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.comment-submit:hover {
+    background-color: #ff00ff;
+    transform: scale(1.05);
+}
+.post-image-slider {
+    position: relative;
+    width: 100%;
+    max-width: 500px; /* 가로폭 제한 (상황에 맞게 조정) */
+    margin: 0 auto;
+    overflow: hidden; /* 필요 시 */
+}
+
+.slider-image-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.slider-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.slider-btn.left {
+    left: 10px;
+}
+
+.slider-btn.right {
+    right: 10px;
+}
+
+.slider-btn:hover {
+    background: rgba(0, 0, 0, 0.6);
+}
