@@ -24,10 +24,10 @@
         <input type="text" id="search_user_input" placeholder="유저 ID 검색">
         <button onclick="searchUsers()">검색</button>
 
-        <!-- 유저 목록 -->
-        <h2>유저 목록</h2>
-        <ul id="users-list">
-            <!-- 유저 목록이 여기에 표시됩니다 -->
+        <!-- 채팅방 목록 -->
+        <h2>채팅방 목록</h2>
+        <ul id="chatrooms-list">
+            <!-- 채팅방 목록이 여기에 표시됩니다 -->
         </ul>
     </div>
     {% endif %}
@@ -38,7 +38,7 @@
             <span class="close" onclick="closeAttachModal()">&times;</span>
             <h2>이미지 첨부</h2>
 
-            <!-- 정사각형 드래그 앤 드롭 영역 -->
+            <!-- 드래그 앤 드롭 영역 -->
             <div id="drop-area" class="drop-area">
                 <p>여기에 파일을 드래그하세요</p>
                 <input type="file" id="fileElem" accept="image/*" style="display:none;" onchange="handleFiles(this.files)">
@@ -66,11 +66,11 @@
     </div>
 
 </div>
-
-{% if user_role == "admin" %}
 <script>
     let socket;
     let selectedChatRoomId = "";
+    let selectedUserId = "";
+    const adminId = "677f744f354606713b09489c";  // 고정 관리자 ID
 
     // 그림 그리기 관련 변수
     let isDrawing = false;
@@ -81,7 +81,7 @@
 
     // 모달 열기
     function openAttachModal() {
-        document.getElementById("attach-modal").style.display = "flex"; // 'block'을 'flex'로 변경
+        document.getElementById("attach-modal").style.display = "flex";
         document.getElementById("drawing-modal").style.display = "none";
     }
 
@@ -92,11 +92,11 @@
 
     // 그림 그리기 모달 열기
     function openDrawingModal() {
-        console.log("openDrawingModal 실행됨"); // 디버깅용
+        console.log("openDrawingModal 실행됨");
         const modal = document.getElementById("drawing-modal");
         if (modal) {
             modal.style.display = "flex";
-            setCanvasSize(); // 동적 크기 설정 호출
+            setCanvasSize();
         } else {
             console.error("drawing-modal 요소를 찾을 수 없습니다!");
         }
@@ -108,6 +108,7 @@
         document.getElementById("drawing-modal").style.display = "none";
         clearCanvas();
     }
+
     function setCanvasSize() {
         const dropArea = document.querySelector('.drop-area');
         const canvas = document.getElementById('drawing-canvas');
@@ -116,18 +117,19 @@
             const dropAreaHeight = dropArea.offsetHeight;
 
             // 캔버스 크기 동기화
-            canvas.style.width = `${dropAreaWidth}px`;
-            canvas.style.height = `${dropAreaHeight}px`;
+            canvas.style.width = dropAreaWidth + "px";
+            canvas.style.height = dropAreaHeight + "px";
 
             // 내부 크기 (실제 드로잉 공간 크기)
             canvas.width = dropAreaWidth;
             canvas.height = dropAreaHeight;
         }
     }
+
     // 드래그 앤 드롭 파일 업로드
     let dropArea = document.getElementById('drop-area');
 
-    // Prevent default behaviors
+    // 기본 동작 방지
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropArea.addEventListener(eventName, preventDefaults, false);
         document.body.addEventListener(eventName, preventDefaults, false);
@@ -138,7 +140,7 @@
         e.stopPropagation();
     }
 
-    // Highlight drop area when item is dragged over it
+    // 아이템이 드래그될 때 드롭 영역 강조
     ['dragenter', 'dragover'].forEach(eventName => {
         dropArea.addEventListener(eventName, highlight, false);
     });
@@ -155,7 +157,7 @@
         dropArea.classList.remove('highlight');
     }
 
-    // Handle dropped files
+    // 드롭된 파일 처리
     dropArea.addEventListener('drop', handleDrop, false);
 
     function handleDrop(e) {
@@ -228,22 +230,30 @@
     // 이미지 전송
     function sendImage(base64Image) {
         if (selectedChatRoomId === "" && "{{ user_role }}" === "admin") {
-            alert("먼저 유저를 선택하세요.");
+            alert("먼저 채팅방을 선택하세요.");
             return;
+        }
+
+        let receiverId = null;
+        if ("{{ user_role }}" === "admin") {
+            receiverId = selectedUserId;  // 유저의 ObjectId
+        } else {
+            receiverId = adminId;  // 고정 관리자 ID
         }
 
         socket.send(JSON.stringify({
             "message_type": "image",
-            "content": base64Image
+            "content": base64Image,
+            "receiver_id": receiverId
         }));
     }
 
     // WebSocket 연결
     function connect() {
-        const userId = "{{ user_id }}";
+        const userId = "{{ user_id }}";  // 세션에서 전달된 사용자의 ObjectId
         const userRole = "{{ user_role }}";
         // WebSocket URL에 user_id와 user_role을 쿼리 파라미터로 추가
-        socket = new WebSocket(`ws://localhost:8000/chat/ws?user_id=${userId}&user_role=${userRole}`);
+        socket = new WebSocket("ws://localhost:8000/chat/ws?user_id=" + encodeURIComponent(userId) + "&user_role=" + encodeURIComponent(userRole));
 
         socket.onopen = function() {
             console.log("WebSocket 연결이 열렸습니다.");
@@ -261,24 +271,27 @@
             }
             const messagesDiv = document.getElementById("messages");
             const messageElement = document.createElement("p");
-            if (data.sender_id === "{{ user_id }}") {
-                messageElement.classList.add("user-message");
-            } else {
+
+            // 발신자에 따라 메시지 분류
+            if (data.sender_name === "admin") {
                 messageElement.classList.add("admin-message");
+            } else {
+                messageElement.classList.add("user-message");
             }
 
             if (data.message_type === "image") {
                 const img = document.createElement("img");
-                img.src = data.message;
+                img.src = data.image;
                 img.style.maxWidth = "200px";
                 img.style.maxHeight = "200px";
                 messageElement.appendChild(img);
             } else {
-                messageElement.textContent = `${data.sender_id}: ${data.message}`;
+                // 텍스트 메시지에 발신자 이름 표시
+                messageElement.textContent = data.sender_name + ": " + data.message;
             }
 
             messagesDiv.appendChild(messageElement);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight; // 스크롤을 최신 메시지로 이동
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // 최신 메시지로 스크롤 이동
         };
 
         socket.onclose = function() {
@@ -297,26 +310,41 @@
         if (message === "") return;
 
         if (selectedChatRoomId === "" && "{{ user_role }}" === "admin") {
-            alert("먼저 유저를 선택하세요.");
+            alert("먼저 채팅방을 선택하세요.");
             return;
         }
 
-        socket.send(JSON.stringify({ "message_type": "text", "content": message }));
+        let receiverId = null;
+        if ("{{ user_role }}" === "admin") {
+            receiverId = selectedUserId;  // 유저의 ObjectId
+        } else {
+            receiverId = adminId;  // 고정 관리자 ID
+        }
+
+        socket.send(JSON.stringify({
+            "message_type": "text",
+            "content": message,
+            "receiver_id": receiverId
+        }));
         messageInput.value = "";
     }
 
-    // 관리자인 경우 유저 목록을 가져와 표시
+    // 관리자일 경우 채팅방 목록을 가져와 표시
     async function loadChatRooms() {
         try {
             const response = await fetch('/chat/chatrooms');
             if (response.ok) {
-                const users = await response.json();
-                const usersList = document.getElementById("users-list");
-                usersList.innerHTML = ""; // 기존 목록 초기화
+                const chatrooms = await response.json();
+                const chatroomsList = document.getElementById("chatrooms-list");
+                chatroomsList.innerHTML = ""; // 기존 목록 초기화
 
-                users.forEach(user => {
+                chatrooms.forEach(chatroom => {
                     const listItem = document.createElement("li");
-                    listItem.textContent = `${user.name || 'Unnamed User'} (ID: ${user.user_id})`;
+                    listItem.innerHTML = `
+                        <div><strong>${chatroom.user_name}</strong> (ID: ${chatroom.user_id})</div>
+                        <div>마지막 메시지: ${chatroom.last_message || '없음'}</div>
+                        <div>업데이트 시간: ${new Date(chatroom.updated_at).toLocaleString()}</div>
+                    `;
                     listItem.style.cursor = "pointer";
                     listItem.style.padding = "10px";
                     listItem.style.borderBottom = "1px solid #333333";
@@ -326,7 +354,7 @@
                     listItem.style.transition = "background-color 0.3s ease, transform 0.2s";
 
                     listItem.onclick = () => {
-                        selectChatRoom(user.user_id);
+                        selectChatRoom(chatroom.chat_room_id, chatroom.user_id);
                     };
 
                     listItem.onmouseover = () => {
@@ -339,7 +367,7 @@
                         listItem.style.transform = "scale(1)";
                     };
 
-                    usersList.appendChild(listItem);
+                    chatroomsList.appendChild(listItem);
                 });
             } else {
                 console.error("채팅방 목록을 불러오는 데 실패했습니다.");
@@ -349,25 +377,27 @@
         }
     }
 
-    // 검색 기능
+    // 유저 검색 기능 (관리자)
     async function searchUsers() {
         const searchInput = document.getElementById("search_user_input");
         const query = searchInput.value.trim();
         if (query === "") {
-            loadChatRooms(); // 검색어가 없으면 모든 유저 목록 다시 로드
+            loadChatRooms(); // 검색어가 없으면 모든 채팅방 목록 다시 로드
             return;
         }
 
         try {
-            const response = await fetch(`/chat/search_users?user_id=${encodeURIComponent(query)}`);
+            const response = await fetch("/chat/search_users?user_id=" + encodeURIComponent(query));
             if (response.ok) {
                 const users = await response.json();
-                const usersList = document.getElementById("users-list");
-                usersList.innerHTML = ""; // 기존 목록 초기화
+                const chatroomsList = document.getElementById("chatrooms-list");
+                chatroomsList.innerHTML = ""; // 기존 목록 초기화
 
                 users.forEach(user => {
                     const listItem = document.createElement("li");
-                    listItem.textContent = `${user.name || 'Unnamed User'} (ID: ${user.user_id})`;
+                    listItem.innerHTML = `
+                        <div><strong>${user.name || 'Unnamed User'}</strong> (ID: ${user.user_id})</div>
+                    `;
                     listItem.style.cursor = "pointer";
                     listItem.style.padding = "10px";
                     listItem.style.borderBottom = "1px solid #333333";
@@ -376,8 +406,15 @@
                     listItem.style.marginBottom = "10px";
                     listItem.style.transition = "background-color 0.3s ease, transform 0.2s";
 
-                    listItem.onclick = () => {
-                        selectChatRoom(user.user_id);
+                    listItem.onclick = async () => {
+                        // 선택된 유저의 채팅방을 가져오거나 생성
+                        const chatRoomResponse = await fetch(`/chat/chatroom/${user.id}`);
+                        if (chatRoomResponse.ok) {
+                            const chatRoom = await chatRoomResponse.json();
+                            selectChatRoom(chatRoom.chat_room_id, chatRoom.user_id);
+                        } else {
+                            alert("해당 유저의 채팅방을 찾을 수 없습니다.");
+                        }
                     };
 
                     listItem.onmouseover = () => {
@@ -390,7 +427,7 @@
                         listItem.style.transform = "scale(1)";
                     };
 
-                    usersList.appendChild(listItem);
+                    chatroomsList.appendChild(listItem);
                 });
             } else {
                 console.error("유저 검색에 실패했습니다.");
@@ -401,17 +438,16 @@
     }
 
     // 채팅방 선택
-    function selectChatRoom(userId) {
-        if (userId === selectedChatRoomId) {
+    function selectChatRoom(chatRoomId, userId) {
+        if (chatRoomId === selectedChatRoomId) {
             alert("이미 선택된 채팅방입니다.");
             return;
         }
 
-        // 유저 ID를 기반으로 채팅방 선택 요청
-        socket.send(JSON.stringify({ "message_type": "select_user", "content": userId }));
-
-        selectedChatRoomId = userId;
-        alert(`유저 ID ${userId}와의 채팅방이 선택되었습니다.`);
+        selectedUserId = userId;
+        socket.send(JSON.stringify({ "message_type": "select_user", "content": chatRoomId }));
+        selectedChatRoomId = chatRoomId;
+        alert("채팅방 ID " + chatRoomId + "이 선택되었습니다.");
     }
 
     // 페이지 로드 시 WebSocket 연결 및 채팅방 목록 로드 (관리자인 경우)
@@ -430,7 +466,6 @@
         canvas.addEventListener('mouseup', stopDrawing);
         canvas.addEventListener('mouseout', stopDrawing);
     };
-
 
     // 메시지 입력 필드에 엔터키로 메시지 전송
     document.addEventListener("DOMContentLoaded", function() {
@@ -457,5 +492,5 @@
         }
     }
 </script>
-{% endif %}
+
 {% endblock %}

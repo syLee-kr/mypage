@@ -1,0 +1,155 @@
+.form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f9f9f9;
+    padding: 40px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 40px auto; /* 화면 중앙 정렬 */
+    text-align: center;
+}
+
+/* 폼 제목 */
+.form-title {
+    font-size: 2rem; /* 약간 더 큰 폰트 크기 */
+    color: #333333;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* 폼 내용 */
+.form-content {
+    display: flex;
+    flex-direction: row;
+    gap: 30px; /* 왼쪽과 오른쪽 간격 확대 */
+    width: 100%;
+}
+
+/* 이미지 업로드 컨테이너 */
+.image-upload-container {
+    flex: 1.5; /* 비율을 키워 가로 길이 확대 */
+    background-color: #e6e6e6;
+    border: 2px dashed #cccccc;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    max-width: 400px; /* 가로 크기 제한 */
+    margin: 0 auto; /* 중앙 정렬 */
+}
+
+/* 이미지 업로드 레이블 */
+.image-upload-label {
+    font-size: 1.4rem; /* 텍스트 크기 확대 */
+    color: #666666;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 200px; /* 더 높은 높이 설정 */
+}
+
+/* 이미지 미리보기 */
+.image-preview {
+    max-width: 100%;
+    max-height: 200px; /* 미리보기 크기 확대 */
+    margin-top: 10px;
+    border-radius: 5px;
+    display: none; /* 기본적으로 숨김 */
+}
+
+.image-upload-container:hover {
+    background-color: #f2f2f2;
+    border-color: #999999;
+}
+
+#image {
+    display: none;
+}
+
+/* 입력 필드 컨테이너 */
+.input-fields-container {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* 필드 간의 간격 확대 */
+}
+
+/* 입력 필드 */
+.input-fields-container input, .input-fields-container textarea {
+    width: 100%;
+    padding: 14px; /* 패딩 확대 */
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #333333;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.input-fields-container input::placeholder, .input-fields-container textarea::placeholder {
+    color: #999999;
+}
+
+.input-fields-container input:focus, .input-fields-container textarea:focus {
+    border-color: #6666ff;
+}
+
+/* 텍스트 에어리어 */
+.input-fields-container textarea {
+    resize: none;
+    height: 120px; /* 높이 확대 */
+}
+
+/* 버튼 */
+.submit-button {
+    padding: 14px 24px; /* 버튼 크기 확대 */
+    background-color: #3333ff;
+    border: none;
+    border-radius: 5px;
+    color: #ffffff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-size: 1.1rem; /* 버튼 텍스트 크기 확대 */
+}
+
+.submit-button:hover {
+    background-color: #6666ff;
+    transform: scale(1.05);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .form-content {
+        flex-direction: column;
+    }
+
+    .image-upload-container {
+        max-width: 100%; /* 모바일에서 가로 크기 제한 제거 */
+        height: auto;
+    }
+
+    .image-upload-label {
+        height: 150px; /* 모바일에서 높이 축소 */
+    }
+
+    .image-preview {
+        max-height: 150px; /* 모바일에서 미리보기 크기 축소 */
+    }
+
+    .input-fields-container {
+        gap: 15px;
+    }
+
+    .submit-button {
+        font-size: 1rem;
+        padding: 12px 20px;
+    }
+}

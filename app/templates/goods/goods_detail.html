@@ -1,0 +1,16 @@
+{% extends "goods/base.html" %}
+
+{% block title %}상품 상세{% endblock %}
+
+{% block content %}
+<h1>{{ goods.name }}</h1>
+<p>{{ goods.description }}</p>
+<p>가격: {{ goods.price }}</p>
+<p>재고: {{ goods.stock }}</p>
+<form action="/goods/purchase/{{ goods['_id'] }}" method="post">
+    <label>수량:</label>
+    <input type="number" name="quantity" required>
+    <input type="hidden" name="user_id" value="user123"> <!-- 현재 유저 아이디 -->
+    <button type="submit">구매</button>
+</form>
+{% endblock %}

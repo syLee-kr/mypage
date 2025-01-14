@@ -20,7 +20,7 @@ async def post_list(
     user_id = request.session.get("user_id")
     user_role = None
     if user_id:
-        user = await UserService.find_user_by_id(user_id)
+        user = await UserService.find_user_by_user_id(user_id)
         if user:
             user_role = user.role
 
@@ -69,7 +69,7 @@ async def post_detail(
     user_id = request.session.get("user_id")
     user_role = None
     if user_id:
-        user = await UserService.find_user_by_id(user_id)
+        user = await UserService.find_user_by_user_id(user_id)
         if user:
             user_role = user.role
 
@@ -116,7 +116,7 @@ async def create_post(
     user_id = request.session.get("user_id")
     if not user_id:
         raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
-    user = await UserService.find_user_by_id(user_id)
+    user = await UserService.find_user_by_user_id(user_id)
     if user.role != "admin":
         raise HTTPException(status_code=403, detail="권한이 없습니다.")
 
@@ -162,7 +162,7 @@ async def edit_post(
     user_id = request.session.get("user_id")
     if not user_id:
         raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
-    user = await UserService.find_user_by_id(user_id)
+    user = await UserService.find_user_by_user_id(user_id)
     if user.role != "admin":
         raise HTTPException(status_code=403, detail="권한이 없습니다.")
 
@@ -196,7 +196,7 @@ async def delete_post(post_id: str, request: Request):
     user_id = request.session.get("user_id")
     if not user_id:
         raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
-    user = await UserService.find_user_by_id(user_id)
+    user = await UserService.find_user_by_user_id(user_id)
 
     success = await PostService.delete_post(post_id, user.role, user_id)
     if not success:
@@ -249,7 +249,7 @@ async def add_comment(post_id: str, request: Request, payload: dict = Body(...))
     if not user_id:
         raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
 
-    user = await UserService.find_user_by_id(user_id)
+    user = await UserService.find_user_by_user_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
 
@@ -274,7 +274,7 @@ async def delete_comment(post_id: str, comment_id: str, request: Request):
     if not user_id:
         raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
 
-    user = await UserService.find_user_by_id(user_id)
+    user = await UserService.find_user_by_user_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
 

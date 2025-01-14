@@ -1,0 +1,17 @@
+{% extends "goods/base.html" %}
+
+{% block title %}상품 목록{% endblock %}
+
+{% block content %}
+{% if user_role == "admin" %}
+<a href="/goods/add">상품 등록</a>
+{% endif %}
+<ul>
+  {% for item in goods %}
+  <li>
+    <a href="/goods/detail/{{ item['_id'] }}">{{ item['name'] }}</a>
+    - 가격: {{ item['price'] }} - 재고: {{ item['stock'] }}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

@@ -36,10 +36,11 @@ async def login(
     # 2. 사용자 인증 (비밀번호 일치 여부 검증)
     is_valid_user = await UserService.verify_user_credentials(userId, password)
     if is_valid_user:
-        user = await UserService.find_user_by_id(userId)  # await 추가
+        user = await UserService.find_user_by_user_id(userId)  # await 추가
         # 3. 세션에 사용자 정보 저장 (user_id, role)
-        request.session["user_id"] = user.user_id
+        request.session["user_id"] = str(user.id)
         request.session["user_role"] = user.role
+        print(f"Session user_id: {request.session.get('user_id')}")
         return RedirectResponse(url="/post", status_code=302)
 
     # 4. 로그인 실패 시 에러 메시지와 함께 페이지 렌더링

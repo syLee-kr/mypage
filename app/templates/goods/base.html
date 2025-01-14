@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>굿즈</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/sidebar.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/goods_add.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/goods.css">
+</head>
+<body>
+<div class="layout-container">
+    {% include "sub/sidebar.html" %}
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+</div>
+{% block script %}
+<!-- 추가 스크립트를 여기에 삽입 -->
+{% endblock %}
+</body>
+</html>

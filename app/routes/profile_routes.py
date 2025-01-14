@@ -15,7 +15,7 @@ async def get_profile(request: Request):
         raise HTTPException(status_code=401, detail="인증되지 않았습니다. 로그인해주세요.")
 
     # UserService를 사용하여 사용자 데이터 가져오기
-    user: User = await UserService.find_user_by_id(user_id)
+    user: User = await UserService.find_user_by_user_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
 
