@@ -8,9 +8,9 @@ from app.config.pyobjectid import PyObjectId
 
 class ChatMessage(BaseModel):
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
-    chat_room_id: PyObjectId  # ChatRoom의 ObjectId 참조
-    sender_id: PyObjectId  # 유저의 ObjectId 참조
-    receiver_id: PyObjectId  # 유저의 ObjectId 참조
+    chat_room_id: str  # ChatRoom의 ObjectId 참조
+    sender_id: str  # 사용자 `user_id` 문자열
+    receiver_id: str  # 사용자 `user_id` 문자열
     message: Optional[str] = None
     image: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
@@ -22,4 +22,4 @@ class ChatMessage(BaseModel):
             datetime: lambda v: v.isoformat()
         }
         arbitrary_types_allowed = True
-        allow_population_by_field_name = True
+        populate_by_name = True

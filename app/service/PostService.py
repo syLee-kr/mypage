@@ -2,6 +2,7 @@
 
 from typing import List, Optional
 from bson import ObjectId
+from pydantic import json
 from pymongo import DESCENDING
 
 from app.database import post_collection, comment_collection  # <- 이제 comment_collection 사용
@@ -12,21 +13,43 @@ from fastapi import HTTPException
 class PostService:
     @staticmethod
     async def get_posts(skip: int = 0, limit: int = 10) -> List[Post]:
-        cursor = post_collection.find({"is_public": True}) \
-            .sort("timestamp", DESCENDING) \
-            .skip(skip).limit(limit)
+        pipeline = [
+            {"$match": {"is_public": True}},
+            {"$sort": {"timestamp": -1}},
+            {"$skip": skip},
+            {"$limit": limit},
+            {
+                "$lookup": {
+                    "from": "comments",
+                    "localField": "_id",
+                    "foreignField": "post_id",
+                    "as": "comments"
+                }
+            },
+            {"$addFields": {"comments": {"$slice": ["$comments", 2]}}},  # 댓글 2개만 가져오기
+        ]
+        cursor = post_collection.aggregate(pipeline)
         posts = []
         async for doc in cursor:
-            post_id = doc["_id"]
-            c_cursor = comment_collection.find({"post_id": post_id}) \
-                .sort("timestamp", DESCENDING)
+            # image_urls 필드 검증 및 수정
+            if "image_urls" not in doc or not isinstance(doc["image_urls"], list):
+                if "image_urls" in doc and isinstance(doc["image_urls"], str):
+                    try:
+                        parsed_urls = json.loads(doc["image_urls"])
+                        if isinstance(parsed_urls, list):
+                            doc["image_urls"] = parsed_urls
+                        else:
+                            doc["image_urls"] = []
+                    except json.JSONDecodeError:
+                        doc["image_urls"] = []
+                else:
+                    doc["image_urls"] = []
 
-            comment_list = []
-            async for c in c_cursor:
-                comment_list.append(Comment(**c))
-
-            doc["comments"] = comment_list  # 2개만 추가
-            posts.append(Post(**doc))
+            print(f"Post ID: {doc['_id']}, Image URLs: {doc['image_urls']}")  # 디버깅 로그
+            try:
+                posts.append(Post(**doc))  # Pydantic 모델로 변환
+            except Exception as e:
+                print(f"Error parsing post: {e}")
         return posts
 
     @staticmethod

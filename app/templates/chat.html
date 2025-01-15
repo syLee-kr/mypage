@@ -70,7 +70,7 @@
     let socket;
     let selectedChatRoomId = "";
     let selectedUserId = "";
-    const adminId = "677f744f354606713b09489c";  // 고정 관리자 ID
+    const adminId = "{{ admin_id }}";  // 템플릿에서 전달된 관리자 ID (문자열 "ARIES")
 
     // 그림 그리기 관련 변수
     let isDrawing = false;
@@ -236,9 +236,9 @@
 
         let receiverId = null;
         if ("{{ user_role }}" === "admin") {
-            receiverId = selectedUserId;  // 유저의 ObjectId
+            receiverId = selectedUserId;  // 유저의 user_id 문자열
         } else {
-            receiverId = adminId;  // 고정 관리자 ID
+            receiverId = adminId;  // 문자열 "ARIES"
         }
 
         socket.send(JSON.stringify({
@@ -250,7 +250,7 @@
 
     // WebSocket 연결
     function connect() {
-        const userId = "{{ user_id }}";  // 세션에서 전달된 사용자의 ObjectId
+        const userId = "{{ user_id }}";  // 세션에서 전달된 사용자의 user_id 문자열
         const userRole = "{{ user_role }}";
         // WebSocket URL에 user_id와 user_role을 쿼리 파라미터로 추가
         socket = new WebSocket("ws://localhost:8000/chat/ws?user_id=" + encodeURIComponent(userId) + "&user_role=" + encodeURIComponent(userRole));
@@ -316,9 +316,9 @@
 
         let receiverId = null;
         if ("{{ user_role }}" === "admin") {
-            receiverId = selectedUserId;  // 유저의 ObjectId
+            receiverId = selectedUserId;  // 유저의 user_id 문자열
         } else {
-            receiverId = adminId;  // 고정 관리자 ID
+            receiverId = adminId;  // 문자열 "ARIES"
         }
 
         socket.send(JSON.stringify({
@@ -408,7 +408,7 @@
 
                     listItem.onclick = async () => {
                         // 선택된 유저의 채팅방을 가져오거나 생성
-                        const chatRoomResponse = await fetch(`/chat/chatroom/${user.id}`);
+                        const chatRoomResponse = await fetch(`/chat/chatroom/${user.user_id}`);
                         if (chatRoomResponse.ok) {
                             const chatRoom = await chatRoomResponse.json();
                             selectChatRoom(chatRoom.chat_room_id, chatRoom.user_id);

@@ -232,75 +232,101 @@ async function fetchPosts() {
             postElement.className = "post";
             postElement.id = `post-${post.id}`;
 
+            // 이미지 슬라이더 HTML 생성
+            let imageSliderHTML = "";
+            if (post.image_urls.length > 0) {
+                const imageUrlsJSON = JSON.stringify(post.image_urls);
+                console.log(`post.id: ${post.id}, imageUrlsJSON: ${imageUrlsJSON}`); // 디버깅 로그
+                imageSliderHTML = `
+                <div class="post-image-slider"
+                     id="post-image-slider-${post.id}"
+                     data-image-urls='${imageUrlsJSON}'>
+                  <!-- 이미지가 두 장 이상일 때만 좌우 버튼 표시 -->
+                  ${post.image_urls.length > 1 ? `
+                  <button class="slider-btn left" onclick="prevImage('${post.id}')">
+                    <i class="fas fa-chevron-left"></i>
+                  </button>
+                  ` : ''}
+                  <!-- 실제 이미지 표시 영역 -->
+                  <div class="slider-image-wrapper" id="slider-image-wrapper-${post.id}">
+                    <img src="${sanitize(post.image_urls[0])}" alt="게시글 이미지" class="slider-image"
+                         id="current-image-${post.id}">
+                  </div>
+                  ${post.image_urls.length > 1 ? `
+                  <button class="slider-btn right" onclick="nextImage('${post.id}')">
+                    <i class="fas fa-chevron-right"></i>
+                  </button>
+                  ` : ''}
+                </div>
+                `;
+
+                // 이미지 인덱스 초기화
+                imageIndices[post.id] = 0;
+            }
+
             // 게시글 HTML
             postElement.innerHTML = `
-        <div class="post-header">
-          <img src="/static/images/profile.png" alt="프로필 이미지" class="profile-pic">
-          <div class="author-name">${sanitize(post.author_id)}</div>
-        </div>
-        ${
-                post.image_urls.length > 0
-                    ? `<div class="post-image">${post.image_urls
-                        .map((url) => `<img src="${url}" alt="게시글 이미지" />`)
-                        .join("")}</div>`
-                    : ""
-            }
-        <div class="post-content">${sanitize(post.content)}</div>
-        <div class="post-actions">
-          <div class="actions">
-            <button
-              id="like-button-${post.id}"
-              class="like-button ${post.likes.includes(userId) ? "liked" : ""}"
-              onclick="toggleLike('${post.id}')"
-            >
-              <i class="${post.likes.includes(userId) ? "fas" : "far"} fa-heart"></i>
-            </button>
-          </div>
-          <div class="likes-count">좋아요 ${post.likes.length}개</div>
-        </div>
+                <div class="post-header">
+                  <img src="/static/images/profile.png" alt="프로필 이미지" class="profile-pic">
+                  <div class="author-name">${sanitize(post.author_id)}</div>
+                </div>
+                ${imageSliderHTML}
+                <!-- 게시글 내용 -->
+                <div class="post-content">${sanitize(post.content)}</div>
+                <!-- 게시글 액션 (좋아요) -->
+                <div class="post-actions">
+                  <div class="actions">
+                    <button
+                      id="like-button-${post.id}"
+                      class="like-button ${post.likes.includes(userId) ? "liked" : ""}"
+                      onclick="toggleLike('${post.id}')"
+                    >
+                      <i class="${post.likes.includes(userId) ? "fas" : "far"} fa-heart"></i>
+                    </button>
+                  </div>
+                  <div class="likes-count">좋아요 ${post.likes.length}개</div>
+                </div>
 
-        <!-- 댓글 영역 -->
-        <div class="post-comments">
-          <h4>댓글</h4>
-          <div id="comments-${post.id}" class="comments">
-            ${
+                <!-- 댓글 영역 -->
+                <div class="post-comments">
+                  <h4>댓글</h4>
+                  <div id="comments-${post.id}" class="comments">
+                    ${
                 post.comments.length > 0
                     ? `
-                  <div class="comment">
-                    <strong>${sanitize(post.comments[0].user_id)}:</strong> ${sanitize(post.comments[0].content)}
-                  </div>
-                  ${
-                        post.comments.length > 1
-                            ? `
-                        <button class="show-more-comments" onclick="showMoreComments('${post.id}')">
-                          댓글 더보기
-                        </button>
-                        <div class="paginated-comments" style="display: none;">
-                          <div class="comments-list"></div>
-                          <div class="pagination-controls">
-                            <button class="prev-button" onclick="changePage('${post.id}', -1)">이전</button>
-                            <div class="page-buttons"></div>
-                            <button class="next-button" onclick="changePage('${post.id}', 1)">다음</button>
-                          </div>
-                        </div>
-                      `
-                            : ""
-                    }
-                `
-                    : ""
+                                  ${post.comments.slice(0, 2).map(c => `
+                                    <div class="comment">
+                                      <strong>${sanitize(c.user_id)}:</strong> ${sanitize(c.content)}
+                                    </div>
+                                  `).join("")}
+                                  ${post.comments.length > 2 ? `
+                                    <button class="show-more-comments" onclick="showMoreComments('${post.id}')">
+                                      댓글 더보기
+                                    </button>
+                                    <div class="paginated-comments" style="display: none;">
+                                      <div class="comments-list"></div>
+                                      <div class="pagination-controls">
+                                        <button class="prev-button" onclick="changePage('${post.id}', -1)">이전</button>
+                                        <div class="page-buttons"></div>
+                                        <button class="next-button" onclick="changePage('${post.id}', 1)">다음</button>
+                                      </div>
+                                    </div>
+                                  ` : ""}
+                                `
+                    : `<p class="no-comments">댓글이 없습니다.</p>`
             }
-          </div>
-          <div class="comment-input-container">
-            <input
-              type="text"
-              placeholder="댓글을 입력하세요"
-              class="comment-input"
-              id="comment-input-${post.id}"
-            />
-            <button onclick="addComment('${post.id}')">게시</button>
-          </div>
-        </div>
-      `;
+                  </div>
+                  <div class="comment-input-container">
+                    <input
+                      type="text"
+                      placeholder="댓글을 입력하세요"
+                      class="comment-input"
+                      id="comment-input-${post.id}"
+                    />
+                    <button onclick="addComment('${post.id}')">게시</button>
+                  </div>
+                </div>
+            `;
 
             postContainer.appendChild(postElement);
         });
@@ -310,6 +336,7 @@ async function fetchPosts() {
         console.error("게시글 가져오기 중 오류:", error);
     }
 }
+
 window.fetchPosts = fetchPosts;
 
 // 무한 스크롤 이벤트
@@ -656,3 +683,71 @@ async function deletePost(postId) {
 }
 window.deletePost = deletePost;
 
+
+window.nextImage = nextImage;
+window.prevImage = prevImage;
+
+const imageIndices = {}; // 각 게시글의 현재 이미지 인덱스 저장
+
+function prevImage(postId) {
+    console.log(`prevImage called for postId: ${postId}`);
+    const sliderWrapper = document.getElementById(`slider-image-wrapper-${postId}`);
+    const currentImage = document.getElementById(`current-image-${postId}`);
+    const rawImages = sliderWrapper.parentNode.dataset.imageUrls; // JSON 문자열 가져오기
+
+    console.log(`post.id: ${postId}, rawImages: ${rawImages}`); // 디버깅 로그
+
+    if (!rawImages || rawImages.trim() === "") {
+        console.error("이미지 데이터가 비어 있습니다.");
+        return;
+    }
+
+    let images;
+    try {
+        images = JSON.parse(rawImages); // JSON 문자열 파싱
+    } catch (error) {
+        console.error("JSON 파싱 오류:", error, "원본 데이터:", rawImages);
+        return;
+    }
+
+    if (!images || images.length === 0) {
+        console.error("이미지 배열이 유효하지 않습니다.");
+        return;
+    }
+
+    if (!imageIndices[postId]) imageIndices[postId] = 0; // 기본 인덱스 설정
+    imageIndices[postId] = (imageIndices[postId] - 1 + images.length) % images.length; // 이전 인덱스 계산
+
+    currentImage.src = images[imageIndices[postId]]; // 이전 이미지로 변경
+}
+
+function nextImage(postId) {
+    const sliderWrapper = document.getElementById(`slider-image-wrapper-${postId}`);
+    const currentImage = document.getElementById(`current-image-${postId}`);
+    const rawImages = sliderWrapper.parentNode.dataset.imageUrls; // JSON 문자열 가져오기
+
+    console.log(`post.id: ${postId}, rawImages: ${rawImages}`); // 디버깅 로그
+
+    if (!rawImages || rawImages.trim() === "") {
+        console.error("이미지 데이터가 비어 있습니다. postId:", postId);
+        return;
+    }
+
+    let images;
+    try {
+        images = JSON.parse(rawImages); // JSON 문자열 파싱
+    } catch (error) {
+        console.error("JSON 파싱 오류:", error, "원본 데이터:", rawImages);
+        return;
+    }
+
+    if (!images || images.length === 0) {
+        console.warn("이미지 배열이 비어 있습니다. postId:", postId);
+        return;
+    }
+
+    if (!imageIndices[postId]) imageIndices[postId] = 0; // 기본 인덱스 설정
+    imageIndices[postId] = (imageIndices[postId] + 1) % images.length; // 다음 인덱스 계산
+
+    currentImage.src = images[imageIndices[postId]]; // 다음 이미지로 변경
+}

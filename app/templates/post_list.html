@@ -27,31 +27,40 @@
       <div class="post" id="post-{{ post.id }}">
         <!-- 게시글 헤더 -->
         <div class="post-header">
-          <img src="/static/images/profile.png" alt="프로필 이미지" class="profile-pic" />
+          <img src="/static/images/star.png" alt="프로필 이미지" class="profile-pic" />
           <div class="author-name">{{ post.author_id }}</div>
         </div>
 
         {% if post.image_urls %}
-        <div class="post-image-slider" id="post-image-slider-{{ post.id }}">
+        <div class="post-image-slider"
+             id="post-image-slider-{{ post.id }}"
+             data-image-urls='{{ post.image_urls | tojson | safe }}'>
+
+          <!-- 이미지가 두 장 이상일 때만 좌우 버튼 표시 -->
+          {% if post.image_urls | length > 1 %}
           <!-- 왼쪽 버튼 -->
           <button class="slider-btn left" onclick="prevImage('{{ post.id }}')">
             <i class="fas fa-chevron-left"></i>
           </button>
+          {% endif %}
 
           <!-- 실제 이미지 표시 영역 -->
           <div class="slider-image-wrapper" id="slider-image-wrapper-{{ post.id }}">
-            <!-- JS에서 현재 인덱스의 이미지 URL만 보이도록 관리 -->
-            <!-- 일단 첫번째 이미지를 기본으로 표시, JS로 나머지 제어 가능 -->
+            <!-- 기본 이미지는 배열의 첫 번째 이미지로 설정 -->
             <img src="{{ post.image_urls[0] }}" alt="게시글 이미지" class="slider-image"
                  id="current-image-{{ post.id }}">
           </div>
 
+          {% if post.image_urls | length > 1 %}
           <!-- 오른쪽 버튼 -->
           <button class="slider-btn right" onclick="nextImage('{{ post.id }}')">
             <i class="fas fa-chevron-right"></i>
           </button>
+          {% endif %}
         </div>
         {% endif %}
+
+
 
         <!-- 게시글 내용 -->
         <div class="post-content">{{ post.content }}</div>

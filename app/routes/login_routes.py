@@ -38,7 +38,7 @@ async def login(
     if is_valid_user:
         user = await UserService.find_user_by_user_id(userId)  # await 추가
         # 3. 세션에 사용자 정보 저장 (user_id, role)
-        request.session["user_id"] = str(user.id)
+        request.session["user_id"] = user.user_id
         request.session["user_role"] = user.role
         print(f"Session user_id: {request.session.get('user_id')}")
         return RedirectResponse(url="/post", status_code=302)

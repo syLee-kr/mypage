@@ -1,4 +1,3 @@
-# app/routes/chat_routes.py
 import json
 from typing import List, Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Request, HTTPException
@@ -6,13 +5,12 @@ from fastapi.responses import RedirectResponse
 from bson import ObjectId
 from datetime import datetime
 
+from app.config.ConnectionManager import ConnectionManager
 from app.config.templates import templates
 from app.database import chat_collection, db, messages_collection, chatroom_collection
-from app.key import ADMIN_ID
 from app.models.ChatMessage import ChatMessage
 from app.models.ChatRoom import ChatRoom
 from app.models.User import User
-from app.service.ChatService import ConnectionManager
 from app.service.UserService import UserService
 
 router = APIRouter()
@@ -27,29 +25,28 @@ async def get_chat_page(request: Request):
     if not user_id:
         return RedirectResponse(url="/login", status_code=302)
 
-    user_object_id = ObjectId(user_id)
     if user_role == "admin":
-        # 관리자는 모든 채팅방을 조회
-        chat_rooms_cursor = chatroom_collection.find({"admin_id": ADMIN_ID}).sort("updated_at", -1)
+        # 관리자는 모든 채팅방을 조회 (admin_id는 항상 "ARIES")
+        chat_rooms_cursor = chatroom_collection.find({"admin_id": "ARIES"}).sort("updated_at", -1)
         chat_rooms = []
         async for room in chat_rooms_cursor:
-            user = await UserService.find_user_by_id(str(room["user_id"]))
+            user = await UserService.find_user_by_user_id(room["user_id"])  # 문자열 user_id 사용
             chat_rooms.append({
                 "chat_room_id": str(room["_id"]),
-                "user_id": str(user.id) if user else "Unknown",
+                "user_id": user.user_id if user else "Unknown",  # 문자열 user_id 사용
                 "user_name": user.name if user else "Unknown",
                 "last_message": room.get("last_message"),
                 "updated_at": room.get("updated_at")
             })
     else:
-        # 일반 유저는 자신의 채팅방만 조회
-        chat_rooms_cursor = chatroom_collection.find({"user_id": user_object_id, "admin_id": ADMIN_ID}).sort("updated_at", -1)
+        # 일반 유저는 자신의 채팅방만 조회 (admin_id는 항상 "ARIES")
+        chat_rooms_cursor = chatroom_collection.find({"user_id": user_id, "admin_id": "ARIES"}).sort("updated_at", -1)
         chat_rooms = []
         async for room in chat_rooms_cursor:
             chat_rooms.append({
                 "chat_room_id": str(room["_id"]),
-                "user_id": str(room["user_id"]),
-                "admin_id": str(room["admin_id"]),
+                "user_id": room["user_id"],  # 문자열 user_id 사용
+                "admin_id": room["admin_id"],
                 "last_message": room.get("last_message"),
                 "updated_at": room.get("updated_at")
             })
@@ -58,7 +55,8 @@ async def get_chat_page(request: Request):
         "request": request,
         "user_id": user_id,
         "user_role": user_role,
-        "chat_rooms": chat_rooms  # 템플릿에 채팅방 목록 전달
+        "chat_rooms": chat_rooms,  # 템플릿에 채팅방 목록 전달
+        "admin_id": "ARIES"  # 추가: 관리자 ID 문자열 직접 전달
     })
 
 @router.websocket("/ws")
@@ -68,16 +66,12 @@ async def websocket_endpoint(websocket: WebSocket):
 
     # WebSocket 쿼리 파라미터에서 user_id와 user_role 추출
     query_params = websocket.query_params
-    user_id = query_params.get("user_id")  # 유저의 ObjectId 문자열
+    user_id = query_params.get("user_id")  # 유저의 user_id 문자열
     user_role = query_params.get("user_role", "user")  # 기본값 'user'
 
     print(f"수신된 user_id: {user_id}, user_role: {user_role}")
 
-    user = None
-    if user_role == "admin":
-        user = await UserService.find_user_by_id(user_id)
-    else:
-        user = await UserService.find_user_by_id(user_id)
+    user = await UserService.find_user_by_user_id(user_id)
 
     if not user:
         print(f"user_id: {user_id}로 유저를 찾을 수 없습니다.")
@@ -95,12 +89,11 @@ async def websocket_endpoint(websocket: WebSocket):
             pass
         else:
             # 일반 유저는 자신의 채팅방에 참여
-            chat_room = await chatroom_collection.find_one({"user_id": user.id, "admin_id": ADMIN_ID})
+            chat_room = await chatroom_collection.find_one({"user_id": user.user_id, "admin_id": "ARIES"})
             if not chat_room:
                 print(f"유저 {user.user_id}에 대한 채팅방을 찾을 수 없어 새로 생성합니다.")
                 new_chat_room = ChatRoom(
-                    user_id=user.id,
-                    admin_id=ADMIN_ID,
+                    user_id=user.user_id,  # 문자열 user_id 사용
                     last_message=None,
                     updated_at=datetime.utcnow()
                 )
@@ -116,20 +109,20 @@ async def websocket_endpoint(websocket: WebSocket):
             print(f"유저 {user.user_id}가 채팅방 {chat_room_id}에 연결됨")
 
             # 이전 메시지 로드 및 전송
-            previous_messages_cursor = messages_collection.find({"chat_room_id": ObjectId(chat_room_id)}).sort("timestamp", 1)
+            previous_messages_cursor = messages_collection.find({"chat_room_id": chat_room_id}).sort("timestamp", 1)
             async for msg in previous_messages_cursor:
                 chat_message = ChatMessage(**msg)
-                if chat_message.sender_id == ADMIN_ID:
+                if chat_message.sender_id == "ARIES":
                     sender_name = "admin"
                 else:
-                    sender_user = await UserService.find_user_by_id(str(chat_message.sender_id))
+                    sender_user = await UserService.find_user_by_user_id(chat_message.sender_id)
                     sender_name = sender_user.name if sender_user else "Unknown"
 
                 serializable_msg = {
                     "id": str(chat_message.id),
-                    "chat_room_id": str(chat_message.chat_room_id),
-                    "sender_id": str(chat_message.sender_id),
-                    "receiver_id": str(chat_message.receiver_id),
+                    "chat_room_id": chat_message.chat_room_id,  # 문자열 chat_room_id 사용
+                    "sender_id": chat_message.sender_id,        # 문자열 user_id 사용
+                    "receiver_id": chat_message.receiver_id,    # 문자열 user_id 사용
                     "message": chat_message.message,
                     "image": chat_message.image,
                     "timestamp": chat_message.timestamp.isoformat(),
@@ -151,32 +144,38 @@ async def websocket_endpoint(websocket: WebSocket):
             if message_type == "select_user" and user_role == "admin":
                 # 관리자가 채팅방 선택
                 selected_chat_room_id = content
-                chat_room = await chatroom_collection.find_one({"_id": ObjectId(selected_chat_room_id), "admin_id": ADMIN_ID})
+                chat_room = await chatroom_collection.find_one({"_id": ObjectId(selected_chat_room_id), "admin_id": "ARIES"})
                 if not chat_room:
                     await websocket.send_json({"type": "error", "message": "유효하지 않은 채팅방입니다."})
                     continue
 
-                selected_user_id = chat_room["user_id"]
+                selected_user_id_raw = chat_room["user_id"]  # 문자열 또는 ObjectId
+                if isinstance(selected_user_id_raw, ObjectId):
+                    selected_user = await UserService.find_user_by_id(str(selected_user_id_raw))
+                    selected_user_id = selected_user.user_id if selected_user else "Unknown"
+                else:
+                    selected_user_id = selected_user_id_raw  # 이미 문자열
+
                 chat_room_id = selected_chat_room_id
 
                 await manager.connect(chat_room_id, websocket)
                 print(f"관리자가 채팅방 {chat_room_id}에 연결됨")
 
                 # 이전 메시지 로드 및 전송
-                previous_messages_cursor = messages_collection.find({"chat_room_id": ObjectId(chat_room_id)}).sort("timestamp", 1)
+                previous_messages_cursor = messages_collection.find({"chat_room_id": chat_room_id}).sort("timestamp", 1)
                 async for msg in previous_messages_cursor:
                     chat_message = ChatMessage(**msg)
-                    if chat_message.sender_id == ADMIN_ID:
+                    if chat_message.sender_id == "ARIES":
                         sender_name = "admin"
                     else:
-                        sender_user = await UserService.find_user_by_id(str(chat_message.sender_id))
+                        sender_user = await UserService.find_user_by_user_id(chat_message.sender_id)
                         sender_name = sender_user.name if sender_user else "Unknown"
 
                     serializable_msg = {
                         "id": str(chat_message.id),
-                        "chat_room_id": str(chat_message.chat_room_id),
-                        "sender_id": str(chat_message.sender_id),
-                        "receiver_id": str(chat_message.receiver_id),
+                        "chat_room_id": chat_message.chat_room_id,  # 문자열 chat_room_id 사용
+                        "sender_id": chat_message.sender_id,        # 문자열 user_id 사용
+                        "receiver_id": chat_message.receiver_id,    # 문자열 user_id 사용
                         "message": chat_message.message,
                         "image": chat_message.image,
                         "timestamp": chat_message.timestamp.isoformat(),
@@ -190,15 +189,15 @@ async def websocket_endpoint(websocket: WebSocket):
                     if not selected_user_id:
                         await websocket.send_json({"type": "error", "message": "채팅방을 먼저 선택하세요."})
                         continue
-                    receiver_id_obj = ObjectId(selected_user_id)
+                    receiver_id_str = selected_user_id  # 문자열 user_id 사용
                 else:
-                    receiver_id_obj = ADMIN_ID
+                    receiver_id_str = "ARIES"  # 문자열 "ARIES"
 
                 # 채팅 메시지 생성 및 저장
                 chat_message = ChatMessage(
-                    chat_room_id=ObjectId(chat_room_id),
-                    sender_id=user.id,
-                    receiver_id=receiver_id_obj,
+                    chat_room_id=chat_room_id,  # 문자열 chat_room_id 사용
+                    sender_id=user.user_id,      # 문자열 user_id 사용
+                    receiver_id=receiver_id_str, # 문자열 user_id 사용
                     message=content if message_type == "text" else None,
                     image=content if message_type == "image" else None,
                     message_type=message_type
@@ -216,9 +215,9 @@ async def websocket_endpoint(websocket: WebSocket):
                 # 메시지 브로드캐스트
                 serializable_message = {
                     "id": str(chat_message.id),
-                    "chat_room_id": str(chat_message.chat_room_id),
-                    "sender_id": str(chat_message.sender_id),
-                    "receiver_id": str(chat_message.receiver_id),
+                    "chat_room_id": chat_message.chat_room_id,    # 문자열 chat_room_id 사용
+                    "sender_id": chat_message.sender_id,          # 문자열 user_id 사용
+                    "receiver_id": chat_message.receiver_id,      # 문자열 user_id 사용
                     "message": chat_message.message,
                     "image": chat_message.image,
                     "timestamp": chat_message.timestamp.isoformat(),
@@ -253,13 +252,13 @@ async def get_chatrooms(request: Request):
     if user_role != "admin":
         raise HTTPException(status_code=403, detail="권한이 없습니다.")
 
-    chat_rooms_cursor = chatroom_collection.find({"admin_id": ADMIN_ID}).sort("updated_at", -1)
+    chat_rooms_cursor = chatroom_collection.find({"admin_id": "ARIES"}).sort("updated_at", -1)
     chat_rooms = []
     async for room in chat_rooms_cursor:
-        user = await UserService.find_user_by_id(str(room["user_id"]))
+        user = await UserService.find_user_by_user_id(room["user_id"])  # 문자열 user_id 사용
         chat_rooms.append({
             "chat_room_id": str(room["_id"]),
-            "user_id": user.user_id if user else "Unknown",
+            "user_id": user.user_id if user else "Unknown",  # 문자열 user_id 사용
             "user_name": user.name if user else "Unknown",
             "last_message": room.get("last_message", "없음"),
             "updated_at": room.get("updated_at")
@@ -285,16 +284,15 @@ async def search_users(request: Request, user_id: Optional[str] = None):
 
 @router.get("/chatroom/{user_id}", response_model=dict)
 async def get_or_create_chatroom(user_id: str):
-    user = await UserService.find_user_by_id(user_id)
+    user = await UserService.find_user_by_user_id(user_id)  # 문자열 user_id 사용
     if not user:
         raise HTTPException(status_code=404, detail="유저를 찾을 수 없습니다.")
 
-    chat_room = await chatroom_collection.find_one({"user_id": user.id, "admin_id": ADMIN_ID})
+    chat_room = await chatroom_collection.find_one({"user_id": user.user_id, "admin_id": "ARIES"})  # 문자열 user_id 사용
     if not chat_room:
         # 새 채팅방 생성
         new_chat_room = ChatRoom(
-            user_id=user.id,
-            admin_id=ADMIN_ID,
+            user_id=user.user_id,  # 문자열 user_id 사용
             last_message=None,
             updated_at=datetime.utcnow()
         )
@@ -305,5 +303,5 @@ async def get_or_create_chatroom(user_id: str):
 
     return {
         "chat_room_id": chat_room_id,
-        "user_id": str(user.id)
+        "user_id": user.user_id  # 문자열 user_id 사용
     }

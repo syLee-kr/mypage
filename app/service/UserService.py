@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from bson import ObjectId
 from fastapi import HTTPException
@@ -70,17 +70,6 @@ class UserService:
         return verify_password(password, user.password)
 
     @staticmethod
-    async def find_user_by_id(user_id: str) -> Optional[User]:
-        user = await user_collection.find_one({"_id": ObjectId(user_id)})
-        if user:
-            try:
-                user_obj = User(**user)
-                return user_obj
-            except ValidationError:
-                raise HTTPException(status_code=500, detail="사용자 데이터가 유효하지 않습니다.")
-        return None
-
-    @staticmethod
     async def find_user_by_user_id(user_id: str) -> Optional[User]:
         """사용자 ID로 사용자 찾기"""
         user = await user_collection.find_one({"user_id": user_id})
@@ -98,16 +87,3 @@ class UserService:
         if user and verify_password(password, user.password):
             return user
         return None
-
-    @staticmethod
-    async def find_users_by_user_id_partial(partial_user_id: str) -> List[User]:
-        """부분 일치하는 user_id로 사용자들 찾기"""
-        cursor = user_collection.find({"user_id": {"$regex": partial_user_id, "$options": "i"}})
-        users = []
-        async for user in cursor:
-            try:
-                user_obj = User(**user)
-                users.append(user_obj)
-            except ValidationError:
-                continue
-        return users

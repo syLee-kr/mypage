@@ -2,13 +2,13 @@
 
 {% block content %}
 <div class="profile-container">
-    <img src="{{ user.profile_image }}" alt="프로필 이미지" class="profile-image">
+    <img src="static/images/profile.png" alt="프로필 이미지" class="profile-image">
     <ul>
         <li><strong>이름:</strong> {{ user.name }}</li>
         <li><strong>사용자 ID:</strong> {{ user.user_id }}</li>
         <li><strong>전화번호:</strong> {{ user.phone }}</li>
-        <li><strong>생일:</strong> {{ user.birthday or 'N/A' }}</li>
-        <li><strong>역할:</strong> {{ user.role }}</li>
+<!--        <li><strong>생일:</strong> {{ user.birthday or 'N/A' }}</li>-->
+<!--        <li><strong>역할:</strong> {{ user.role }}</li>-->
     </ul>
 </div>
 <!-- JavaScript 포함 가능 -->
