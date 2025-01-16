@@ -8,10 +8,10 @@
         <li><a href="/chat">
             <span class="icon"><img src="/static/images/message.png" alt="메세지 아이콘"></span> 메시지
         </a></li>
-        <li><a href="/main">
+        <li><a href="/wait">
             <span class="icon"><img src="/static/images/alarm.png" alt="알림 아이콘"></span> 알림
         </a></li>
-        <li><a href="/goods">
+        <li><a href="/wait">
             <span class="icon"><img src="/static/images/shop.png" alt="마켓 아이콘"></span> 마켓
         </a></li>
         <li><a href="/profile">
@@ -28,17 +28,17 @@
         </a></li>
         {% endif %}
 
-        {% if user is not none %}
-        <li><a href="/login/logout">
-            <span class="icon"><img src="/static/images/logout.png" alt="로그아웃 아이콘"></span> 로그아웃
-        </a></li>
-        {% else %}
+        {% if not user_role %}
         <li><a href="/login">
             <span class="icon"><img src="/static/images/login.png" alt="로그인 아이콘"></span> 로그인
         </a></li>
+        {% else %}
+        <li><a href="/login/logout">
+            <span class="icon"><img src="/static/images/logout.png" alt="로그아웃 아이콘"></span> 로그아웃
+        </a></li>
         {% endif %}
 
-        <li><a href="/setting">
+        <li><a href="/wait">
             <span class="icon"><img src="/static/images/setting.png" alt="설정 아이콘"></span> 설정
         </a></li>
     </ul>

@@ -18,11 +18,11 @@ async def post_list(
         format: Optional[str] = None,
 ):
     user_id = request.session.get("user_id")
-    user_role = None
-    if user_id:
-        user = await UserService.find_user_by_user_id(user_id)
-        if user:
-            user_role = user.role
+
+    if not user_id:
+        user_role = None
+    else:
+        user_role = await UserService.check_user_role(user_id)
 
     posts = await PostService.get_posts(skip=skip, limit=limit)
 
@@ -37,7 +37,6 @@ async def post_list(
                 "is_public": p.is_public,
                 "image_urls": p.image_urls,
                 "likes": p.likes,
-                # 이미 Service에서 2개 댓글만 붙였다고 가정
                 "comments": [c.dict(by_alias=True) for c in p.comments],
                 "timestamp": p.timestamp.isoformat() if p.timestamp else None,
             })
@@ -54,7 +53,6 @@ async def post_list(
             },
         )
 
-
 @router.get("/{post_id}")
 async def post_detail(
         request: Request,
@@ -67,11 +65,11 @@ async def post_detail(
     - post_detail.html을 렌더링 (또는 JSON)
     """
     user_id = request.session.get("user_id")
-    user_role = None
-    if user_id:
-        user = await UserService.find_user_by_user_id(user_id)
-        if user:
-            user_role = user.role
+
+    if not user_id:
+        user_role = None
+    else:
+        user_role = await UserService.check_user_role(user_id)
 
     updated_post = await PostService.get_post_details(post_id)
     if not updated_post:
@@ -88,7 +86,7 @@ async def post_detail(
             "likes": updated_post.likes,
             # 모든 댓글
             "comments": [c.dict(by_alias=True) for c in updated_post.comments],
-            "timestamp": updated_post.timestamp.isoformat() if updated_post.timestamp else None,
+            "timestamp": updated_post.timestamp.strftime("%Y-%m-%d %H:%M") if updated_post.timestamp else None,
         }
     else:
         # HTML 템플릿 예: post_detail.html
@@ -138,7 +136,7 @@ async def create_post(
         "is_public": is_public,
         "image_urls": image_urls,
         "likes": [],
-        "timestamp": datetime.utcnow(),
+        "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
     }
 
     created_post = await PostService.create_post(new_post, user.role)
@@ -232,12 +230,13 @@ async def toggle_like(post_id: str, request: Request):
             {
                 "id": str(c.id),
                 "user_id": str(c.user_id),
+                "post_id": str(c.post_id),  # 여기에 post_id 추가
                 "content": c.content,
-                "timestamp": c.timestamp.isoformat() if c.timestamp else None
+                "timestamp": c.timestamp.strftime("%Y-%m-%d %H:%M") if c.timestamp else None
             }
             for c in updated_post.comments
         ],
-        "timestamp": updated_post.timestamp.isoformat() if updated_post.timestamp else None,
+        "timestamp": updated_post.timestamp.strftime("%Y-%m-%d %H:%M") if updated_post.timestamp else None,
     }
 
     return {"message": "좋아요 상태가 변경되었습니다.", "post": post_dict}
@@ -260,12 +259,19 @@ async def add_comment(post_id: str, request: Request, payload: dict = Body(...))
     if user.role not in ["admin", "user"]:
         raise HTTPException(status_code=403, detail="권한이 없습니다.")
 
-    new_comment = Comment(user_id=user_id, content=content)
+    new_comment = Comment(user_id=user_id, content=content, post_id=post_id)
     result = await PostService.add_comment(post_id, new_comment, user.role)
     if not result:
         raise HTTPException(status_code=400, detail="댓글 추가 실패")
 
-    return {"message": "댓글이 추가되었습니다.", "comment_id": result["comment_id"]}
+    # 추가된 댓글 데이터를 반환
+    return {
+        "message": "댓글이 추가되었습니다.",
+        "comment_id": result["comment_id"],
+        "user_id": user_id,
+        "content": content,
+        "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M"),  # UTC로 반환
+    }
 
 
 @router.delete("/{post_id}/comments/{comment_id}")

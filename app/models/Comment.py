@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
 from datetime import datetime
 
@@ -7,6 +9,7 @@ from app.config.pyobjectid import PyObjectId
 class Comment(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     user_id: str
+    post_id: Optional[PyObjectId] = None
     content: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 

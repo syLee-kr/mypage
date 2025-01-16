@@ -87,3 +87,11 @@ class UserService:
         if user and verify_password(password, user.password):
             return user
         return None
+
+    @staticmethod
+    async def list_users(page: int = 1, size: int = 20) -> List[User]:
+        """모든 유저를 페이징하여 반환"""
+        skip = (page - 1) * size
+        users_cursor = user_collection.find().skip(skip).limit(size)
+        users = [User(**user) for user in await users_cursor.to_list(length=size)]
+        return users

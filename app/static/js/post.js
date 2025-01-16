@@ -505,6 +505,7 @@ window.toggleLike = toggleLike;
 async function addComment(postId) {
     const commentInput = document.getElementById(`comment-input-${postId}`);
     const content = commentInput.value.trim();
+
     if (!content) {
         alert("댓글 내용을 입력해주세요.");
         return;
@@ -524,24 +525,35 @@ async function addComment(postId) {
             return;
         }
 
-        alert("댓글이 추가되었습니다.");
+        const data = await response.json();
+
+        // 댓글 입력 필드 초기화
         commentInput.value = "";
 
-        // 최신순으로 추가
-        if (!commentsData[postId]) {
-            commentsData[postId] = [];
-        }
-        commentsData[postId].unshift({
-            user_id: userId,
-            content: content,
-            timestamp: new Date().toISOString(),
-        });
+        // DOM 업데이트: 새로운 댓글을 상단에 추가
+        const commentsContainer = document.getElementById(`comments-${postId}`);
+        const newCommentHtml = `
+            <div class="comment">
+                <span class="comment-author">${sanitize(data.user_id)}</span>
+                <span class="comment-text">${sanitize(data.content)}</span>
+                <span class="comment-timestamp">${new Date(data.timestamp).toLocaleString()}</span>
+            </div>
+        `;
+        commentsContainer.insertAdjacentHTML("afterbegin", newCommentHtml);
 
-        // 댓글 전체를 재렌더링
-        renderInitialComments(postId);
+        alert(data.message);
+
     } catch (error) {
         console.error("댓글 추가 중 오류:", error);
+        alert("댓글 추가 중 오류가 발생했습니다.");
     }
+}
+
+// HTML 특수문자 이스케이프 처리
+function sanitize(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
 }
 window.addComment = addComment;
 

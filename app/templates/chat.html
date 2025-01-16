@@ -1,3 +1,4 @@
+<!-- templates/chat.html -->
 {% extends "main.html" %}
 
 {% block content %}
@@ -23,6 +24,7 @@
         <!-- 검색창 -->
         <input type="text" id="search_user_input" placeholder="유저 ID 검색">
         <button onclick="searchUsers()">검색</button>
+        <button onclick="viewUsers()">유저 보기</button> <!-- 유저 보기 버튼 추가 -->
 
         <!-- 채팅방 목록 -->
         <h2>채팅방 목록</h2>
@@ -71,6 +73,9 @@
     let selectedChatRoomId = "";
     let selectedUserId = "";
     const adminId = "{{ admin_id }}";  // 템플릿에서 전달된 관리자 ID (문자열 "ARIES")
+
+    // 현재 모드 추적 (chatrooms 또는 users)
+    let currentMode = "chatrooms"; // 초기 모드는 채팅방 목록
 
     // 그림 그리기 관련 변수
     let isDrawing = false;
@@ -192,6 +197,7 @@
         const rect = canvas.getBoundingClientRect();
         x = event.clientX - rect.left;
         y = event.clientY - rect.top;
+        context.strokeStyle = "#000000"; // 검정색 선으로 설정
     }
 
     // 그림 그리기
@@ -203,7 +209,7 @@
         context.beginPath();
         context.moveTo(x, y);
         context.lineTo(newX, newY);
-        context.strokeStyle = "#00e6e6"; // 네온 블루 선
+        context.strokeStyle = "#ffffff"; // 검정색 선으로 변경
         context.lineWidth = 2;
         context.stroke();
         x = newX;
@@ -383,6 +389,7 @@
         const query = searchInput.value.trim();
         if (query === "") {
             loadChatRooms(); // 검색어가 없으면 모든 채팅방 목록 다시 로드
+            currentMode = "chatrooms";
             return;
         }
 
@@ -429,11 +436,108 @@
 
                     chatroomsList.appendChild(listItem);
                 });
+
+                currentMode = "search";
             } else {
                 console.error("유저 검색에 실패했습니다.");
             }
         } catch (error) {
             console.error("유저 검색 중 오류가 발생했습니다:", error);
+        }
+    }
+
+    // 모든 유저를 페이징하여 조회
+    let currentUserPage = 1;
+
+    async function viewUsers() {
+        currentMode = "users";
+        currentUserPage = 1;
+        loadUsers(currentUserPage);
+    }
+
+    async function loadUsers(page) {
+        try {
+            const response = await fetch(`/chat/list_users?page=${page}&size=20`);
+            if (response.ok) {
+                const users = await response.json();
+                const chatroomsList = document.getElementById("chatrooms-list");
+                chatroomsList.innerHTML = ""; // 기존 목록 초기화
+
+                users.forEach(user => {
+                    const listItem = document.createElement("li");
+                    listItem.innerHTML = `
+                        <div><strong>${user.name || 'Unnamed User'}</strong> (ID: ${user.user_id})</div>
+                    `;
+                    listItem.style.cursor = "pointer";
+                    listItem.style.padding = "10px";
+                    listItem.style.borderBottom = "1px solid #333333";
+                    listItem.style.backgroundColor = "#262626";
+                    listItem.style.borderRadius = "10px";
+                    listItem.style.marginBottom = "10px";
+                    listItem.style.transition = "background-color 0.3s ease, transform 0.2s";
+
+                    listItem.onclick = async () => {
+                        // 선택된 유저의 채팅방을 가져오거나 생성
+                        const chatRoomResponse = await fetch(`/chat/chatroom/${user.user_id}`);
+                        if (chatRoomResponse.ok) {
+                            const chatRoom = await chatRoomResponse.json();
+                            selectChatRoom(chatRoom.chat_room_id, chatRoom.user_id);
+                        } else {
+                            alert("해당 유저의 채팅방을 찾을 수 없습니다.");
+                        }
+                    };
+
+                    listItem.onmouseover = () => {
+                        listItem.style.backgroundColor = "#333333";
+                        listItem.style.transform = "scale(1.02)";
+                    };
+
+                    listItem.onmouseout = () => {
+                        listItem.style.backgroundColor = "#262626";
+                        listItem.style.transform = "scale(1)";
+                    };
+
+                    chatroomsList.appendChild(listItem);
+                });
+
+                // 페이징 컨트롤 추가
+                const pagination = document.createElement("div");
+                pagination.id = "pagination-controls";
+                pagination.style.marginTop = "10px";
+                pagination.style.textAlign = "center";
+
+                const prevButton = document.createElement("button");
+                prevButton.textContent = "이전";
+                prevButton.disabled = page <= 1;
+                prevButton.onclick = () => {
+                    if (page > 1) {
+                        currentUserPage--;
+                        loadUsers(currentUserPage);
+                    }
+                };
+
+                const nextButton = document.createElement("button");
+                nextButton.textContent = "다음";
+                // 다음 버튼 비활성화는 현재 페이지에 20명 미만의 유저가 있을 때
+                nextButton.disabled = users.length < 20;
+                nextButton.onclick = () => {
+                    currentUserPage++;
+                    loadUsers(currentUserPage);
+                };
+
+                const pageInfo = document.createElement("span");
+                pageInfo.textContent = ` 페이지 ${page} `;
+
+                pagination.appendChild(prevButton);
+                pagination.appendChild(pageInfo);
+                pagination.appendChild(nextButton);
+
+                chatroomsList.appendChild(pagination);
+            } else {
+                console.error("유저 목록을 불러오는 데 실패했습니다.");
+            }
+        } catch (error) {
+            console.error("유저 목록을 불러오는 중 오류가 발생했습니다:", error);
         }
     }
 

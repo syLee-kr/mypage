@@ -305,3 +305,50 @@ async def get_or_create_chatroom(user_id: str):
         "chat_room_id": chat_room_id,
         "user_id": user.user_id  # 문자열 user_id 사용
     }
+@router.get("/list_users", response_model=List[User])
+async def list_users(request: Request, page: int = 1, size: int = 20):
+    print(f"Received request to list_users: page={page}, size={size}")
+    """
+    모든 유저를 페이징하여 조회합니다.
+    - page: 페이지 번호 (기본값 1)
+    - size: 페이지당 유저 수 (기본값 20)
+    """
+    session = request.session
+    user_role = session.get("user_role", "user")
+    if user_role != "admin":
+        raise HTTPException(status_code=403, detail="권한이 없습니다.")
+
+    if page < 1:
+        page = 1
+    if size < 1:
+        size = 20
+
+    try:
+        users = await UserService.list_users(page=page, size=size)
+        return users
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/chatroom/{user_id}", response_model=dict)
+async def get_or_create_chatroom(user_id: str):
+    user = await UserService.find_user_by_user_id(user_id)  # 문자열 user_id 사용
+    if not user:
+        raise HTTPException(status_code=404, detail="유저를 찾을 수 없습니다.")
+
+    chat_room = await chatroom_collection.find_one({"user_id": user.user_id, "admin_id": "ARIES"})  # 문자열 user_id 사용
+    if not chat_room:
+        # 새 채팅방 생성
+        new_chat_room = ChatRoom(
+            user_id=user.user_id,  # 문자열 user_id 사용
+            last_message=None,
+            updated_at=datetime.utcnow()
+        )
+        result = await chatroom_collection.insert_one(new_chat_room.dict(by_alias=True))
+        chat_room_id = str(result.inserted_id)
+    else:
+        chat_room_id = str(chat_room["_id"])
+
+    return {
+        "chat_room_id": chat_room_id,
+        "user_id": user.user_id  # 문자열 user_id 사용
+    }

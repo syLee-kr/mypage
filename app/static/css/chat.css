@@ -16,13 +16,16 @@
     flex-direction: column;
     background-color: #0d0d0d; /* 어두운 배경 */
 }
-
-/* 채팅 메시지 표시 영역 */
 #messages {
     flex: 1; /* 남은 공간 모두 차지 */
     padding: 20px;
     overflow-y: auto; /* 세로 스크롤 허용 */
     background-color: #1a1a1a; /* 진한 그레이 배경 */
+
+    /* Flexbox 적용 */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* 기본 정렬을 왼쪽으로 설정 */
 
     /* 스크롤바 숨기기 */
     scrollbar-width: none; /* Firefox */
@@ -46,17 +49,17 @@
 
 /* 사용자 메시지 (오른쪽 정렬) */
 #messages .user-message {
-    background-color: #00e6e6; /* 네온 블루 배경 */
+    background-color: #a1d6d6; /* 네온 블루 배경 */
     color: #0d0d0d;
-    align-self: flex-end;
+    align-self: flex-end; /* 오른쪽 정렬 */
     border-bottom-right-radius: 0;
 }
 
 /* 관리자 메시지 (왼쪽 정렬) */
 #messages .admin-message {
-    background-color: #ff00ff; /* 네온 핑크 배경 */
+    background-color: #ec8abe; /* 네온 핑크 배경 */
     color: #ffffff;
-    align-self: flex-start;
+    align-self: flex-start; /* 왼쪽 정렬 */
     border-bottom-left-radius: 0;
 }
 

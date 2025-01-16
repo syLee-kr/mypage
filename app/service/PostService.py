@@ -14,20 +14,21 @@ class PostService:
     @staticmethod
     async def get_posts(skip: int = 0, limit: int = 10) -> List[Post]:
         pipeline = [
-            {"$match": {"is_public": True}},
-            {"$sort": {"timestamp": -1}},
-            {"$skip": skip},
-            {"$limit": limit},
+            {"$match": {"is_public": True}},  # 공개된 게시글만
+            {"$sort": {"timestamp": -1}},    # 최신 순 정렬
+            {"$skip": skip},                 # 페이징: skip
+            {"$limit": limit},               # 페이징: limit
             {
                 "$lookup": {
-                    "from": "comments",
-                    "localField": "_id",
-                    "foreignField": "post_id",
-                    "as": "comments"
+                    "from": "comment",       # 댓글 컬렉션 이름
+                    "localField": "_id",     # 게시글의 _id
+                    "foreignField": "post_id", # 댓글의 post_id
+                    "as": "comments"         # 결과를 comments 필드로
                 }
-            },
-            {"$addFields": {"comments": {"$slice": ["$comments", 2]}}},  # 댓글 2개만 가져오기
+            }
         ]
+
+
         cursor = post_collection.aggregate(pipeline)
         posts = []
         async for doc in cursor:
@@ -68,6 +69,7 @@ class PostService:
         async for c in c_cursor:
             comment_list.append(Comment(**c))
 
+        print(comment_list)
         post_doc["comments"] = comment_list
         return Post(**post_doc)
     @staticmethod
